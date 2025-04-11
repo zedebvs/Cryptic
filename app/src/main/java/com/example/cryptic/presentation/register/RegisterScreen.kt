@@ -1,4 +1,4 @@
-package com.example.cryptic.presentation.login
+package com.example.cryptic.presentation.register
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,14 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -26,7 +23,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,32 +37,29 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.presentation.start.GradientBackground
-import kotlinx.coroutines.delay
+
 
 @Composable
-fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
+fun RegisterScreen(navController: NavController) {
     GradientBackground() {
         var emailText by remember { mutableStateOf("") }
         var passwordText by remember { mutableStateOf("") }
-        val authResult by viewModel.authResult
-        val scrollState = rememberScrollState()
+        var nameText by remember { mutableStateOf("") }
+        var passwordText2 by remember { mutableStateOf("") }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .systemBarsPadding()
-                .verticalScroll(scrollState)
-                .imePadding()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Log In",
+                text = "Sign Up",
                 style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 56.sp),
                 color = Color.White
             )
@@ -76,55 +69,31 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
             CustomTextField(
                 value = emailText,
                 onValueChange = { emailText = it },
-                placeholder = "Email/Login"
+                placeholder = "Email"
             )
-
+            CustomTextField(
+                value = nameText,
+                onValueChange = { nameText = it },
+                placeholder = "Name"
+            )
             CustomTextField(
                 value = passwordText,
                 onValueChange = { passwordText = it },
                 placeholder = "Password",
                 isPassword = true
             )
+            CustomTextField(
+                value = passwordText2,
+                onValueChange = { passwordText2 = it },
+                placeholder = "Repeat password",
+                isPassword = true
+            )
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    text = "Forgot password?",
-                    style = TextStyle(fontSize = 24.sp),
-                    color = Color.White,
-                    modifier = Modifier.clickable {
-                        navController.navigate("reset_password")
-                    },
-                )
-            }
-            authResult?.let { isSuccess ->
-                if (isSuccess) {
-                    viewModel.resetAuthResult()
-                    Text("success!", color = Color.Green)
-                    navController.navigate("home")
-                } else {
-                    emailText = ""
-                    passwordText = ""
-                    LaunchedEffect(Unit) {
-                        delay(2000)
-                        viewModel.resetAuthResult()
-                    }
-                    Text(
-                        "Wrong password or email/name",
-                        color = Color.Red,
-                        style = TextStyle(fontSize = 20.sp),
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
-                    viewModel.checkCredentials(emailText, passwordText)
+
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF0F71DE),
@@ -138,25 +107,24 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                 shape = RoundedCornerShape(20.dp),
             ) {
                 Text(
-                    text = "Log In",
+                    text = "Sign Up",
                     style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold)
                 )
             }
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Don't have an account?",
+                    text = "Already have an account?",
                     style = TextStyle(fontSize = 16.sp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Sign Up",
+                    text = "Sign In",
                     modifier = Modifier.clickable {
-                        navController.navigate("registration") {
+                        navController.navigate("login") {
                             popUpTo("start") { inclusive = false }
                             launchSingleTop = true
                         }
@@ -167,13 +135,6 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun StartScreenPreview() {
-    val navController = rememberNavController()
-    LoginScreen(navController = navController)
 }
 
 @Composable
@@ -227,5 +188,9 @@ fun CustomTextField(
     )
 }
 
-
-
+@Preview(showBackground = true)
+@Composable
+fun StartScreenPreview() {
+    val navController = rememberNavController()
+    RegisterScreen(navController = navController)
+}
