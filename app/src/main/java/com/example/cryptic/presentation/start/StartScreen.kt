@@ -50,7 +50,7 @@ fun StartScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.icon), // без расширения
+                    painter = painterResource(id = R.drawable.icon),
                     contentDescription = "Логотип",
                     modifier = Modifier
                         .size(164.dp)

@@ -104,7 +104,11 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                 if (isSuccess) {
                     viewModel.resetAuthResult()
                     Text("success!", color = Color.Green)
-                    navController.navigate("home")
+                    navController.navigate("home"){
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
                 } else {
                     emailText = ""
                     passwordText = ""
