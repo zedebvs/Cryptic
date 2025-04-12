@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,10 +41,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,8 +64,12 @@ fun HomeScreen(navController: NavController) {
                 .systemBarsPadding()
                 .fillMaxSize()
                 .background(Color(0xFF202126))
-                .pointerInput(Unit){
-
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { change, dragAmount ->
+                        if (dragAmount > 30 && change.position.x < 50) {
+                            showMenu.value = true
+                        }
+                    }
                 }
         ) {
             Box(
@@ -72,6 +77,7 @@ fun HomeScreen(navController: NavController) {
                     .fillMaxWidth()
                     .fillMaxHeight(0.1f)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
+
             ) {
                 IconButton(
                     onClick = {
@@ -143,7 +149,7 @@ fun HomeScreen(navController: NavController) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(0.75f)
+                    .fillMaxWidth(0.8f)
                     .systemBarsPadding()
                     .background(Color.DarkGray)
             ) {
@@ -159,7 +165,7 @@ fun HomeScreen(navController: NavController) {
                     ) {
                         Text(
                             text = User_test.login,
-                            style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 26.sp),
+                            style = TextStyle(fontSize = 22.sp),
                             color = Color.White
                         )
 
@@ -176,88 +182,40 @@ fun HomeScreen(navController: NavController) {
                         )
                     }
 
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.1f)
-                        .background(Color(0xFF2F2F36))
-                        .padding(10.dp)
-                        .clickable(){
+                    DrawerItem(
+                        "Настройки", Icons.Default.Settings,
+                        onClick = {
 
-                        },
-                        verticalAlignment = Alignment.CenterVertically){
-                        Text(
-                            text = "Настройки",
-                            style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 28.sp),
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
+                        }
 
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Настройки",
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .offset(-15.dp)
-                        )
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(1.dp))
 
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.1f)
-                        .background(Color(0xFF2F2F36))
-                        .padding(10.dp)
-                        .clickable(){
+                    DrawerItem(
+                        "Профиль", Icons.Default.AccountCircle,
+                        onClick = {
 
-                        },
-                        verticalAlignment = Alignment.CenterVertically){
-                        Text(
-                            text = "Профиль",
-                            style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 28.sp),
-                            color = Color.White,
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
+                        }
 
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Профиль",
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .offset(-15.dp)
-                        )
-                    }
+                    )
+
                     Spacer(modifier = Modifier.height(1.dp))
 
-                    Row(modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.85f)
-                        .background(Color(0xFF2F2F36))
-                        .padding(10.dp)
-                        .clickable(){
+                    Spacer(modifier = Modifier.weight(1f))
 
-                        },
-                        verticalAlignment = Alignment.Bottom){
-                        Text(
-                            text = "Выйти",
-                            style = TextStyle( fontSize = 28.sp),
-                            color = (Color(0xFFB42424))
-                        )
+                    DrawerItem(
+                        text = "Выйти",
+                        icon = Icons.Default.ExitToApp,
+                        textColor = Color(0xFFB42424),
+                        iconTint = Color.Gray,
+                        onClick = {
 
-                        Spacer(modifier = Modifier.weight(1f))
+                        }
+                    )
 
-                        Icon(
-                            imageVector = Icons.Default.ExitToApp,
-                            contentDescription = "Выход",
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .offset(-15.dp)
-                        )
-                    }
                     Spacer(modifier = Modifier.height(1.dp))
+
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -302,3 +260,35 @@ fun HomeScre() {
     HomeScreen(navController = navController)
 }
 
+@Composable
+fun DrawerItem(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    textColor: Color = Color.White,
+    iconTint: Color = Color.Gray
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF2F2F36))
+            .padding(10.dp)
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = text,
+            style = TextStyle(fontSize = 22.sp),
+            color = textColor
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Icon(
+            imageVector = icon,
+            contentDescription = text,
+            tint = iconTint,
+            modifier = Modifier
+                .size(36.dp)
+                .offset(x = (-15).dp)
+        )
+    }
+}
