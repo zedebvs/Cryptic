@@ -413,7 +413,7 @@ fun ChatItem(item: ChatItemData, onClick: () -> Unit) {
                     )
                 }
                 else -> {
-                    Spacer(modifier = Modifier.size(16.dp)) // Пустота для прочитанного входящего
+                    Spacer(modifier = Modifier.size(16.dp))
                 }
             }
         }
