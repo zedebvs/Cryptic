@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
@@ -40,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cryptic.R
 import com.example.cryptic.presentation.login.User
+
+
 
 
 
@@ -98,7 +99,7 @@ fun test() {
                 verticalAlignment = Alignment.CenterVertically){
                 Text(
                     text = "Настройки",
-                    style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 28.sp),
+                    style = TextStyle( fontSize = 28.sp),
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -144,7 +145,7 @@ fun test() {
 
             Row(modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.85f)
+                .fillMaxHeight(0.55f)
                 .background(Color(0xFF2F2F36))
                 .padding(10.dp)
                 .clickable(){

@@ -112,6 +112,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                 } else {
                     emailText = ""
                     passwordText = ""
+                    emailText = ""
                     LaunchedEffect(Unit) {
                         delay(2000)
                         viewModel.resetAuthResult()
@@ -128,7 +129,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
 
             Button(
                 onClick = {
-                    viewModel.checkCredentials(emailText, passwordText)
+                    viewModel.checkCredentials(emailText, passwordText, emailText)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF0F71DE),

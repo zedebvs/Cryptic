@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.presentation.ResetPassword.ResetPasswordScreen
 import com.example.cryptic.presentation.login.LoginScreen
 import com.example.cryptic.presentation.main.HomeScreen
+import com.example.cryptic.presentation.main.ProfileScreen
+import com.example.cryptic.presentation.main.SettingsScreen
 import com.example.cryptic.presentation.register.RegisterScreen
 import com.example.cryptic.presentation.start.StartScreen
 
@@ -28,6 +30,15 @@ fun AppNavGraph(navController: NavHostController) {
             ResetPasswordScreen(navController)
         }
         composable("home") {
+            HomeScreen(navController)
+        }
+        composable("profile") {
+            ProfileScreen(navController)
+        }
+        composable("settings") {
+            SettingsScreen(navController)
+        }
+        composable("exit") {
             HomeScreen(navController)
         }
     }

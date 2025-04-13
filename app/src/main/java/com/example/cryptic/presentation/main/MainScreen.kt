@@ -26,6 +26,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
@@ -45,13 +47,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.R
+import com.example.cryptic.domain.model.ChatItemData
 import com.example.cryptic.presentation.login.User
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.DoneAll
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -66,7 +72,7 @@ fun HomeScreen(navController: NavController) {
                 .background(Color(0xFF202126))
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures { change, dragAmount ->
-                        if (dragAmount > 30 && change.position.x < 50) {
+                        if (change.position.x < 50 && dragAmount > 0) {
                             showMenu.value = true
                         }
                     }
@@ -112,23 +118,43 @@ fun HomeScreen(navController: NavController) {
                     )
                 }
             }
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(100) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0xB7363640)),
+            val chats = remember {
+                listOf(
+                    ChatItemData(
+                        R.drawable.test_image2, "Test_name",
+                        "Привет! Как у тебя дела? Давно не виделись, не хочешь встретиться?",
+                        "3:59", true, true, true
+                    ),
+                    ChatItemData(
+                        R.drawable.test_image, "Миша",
+                        "Ща подойду!", "4:02", false, false, false
+                    ),
+                    ChatItemData(
+                        R.drawable.test_image2, "Test_name",
+                        "Привет! Как у тебя дела? Давно не виделись, не хочешь встретиться?",
+                        "3:59", true, true, false
+                    ),
+                    ChatItemData(
+                        R.drawable.test_image, "Миша",
+                        "Ща подойду!", "4:02", true, false, true
+                    ),
+                    ChatItemData(
+                        R.drawable.test_image, "Миша",
+                        "Ща подойду!", "4:02", false, false, true
+                    )
 
-                    ) {
-                        Text(
-                            text = "Чат $it",
-                            color = Color.White,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(1.5.dp))
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF202126))
+            ) {
+                items(chats) { chat ->
+                    ChatItem(item = chat, onClick = {
+                        navController.navigate("chat_screen")
+                    })
                 }
             }
         }
@@ -137,7 +163,6 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.4f))
-                    .clickable { showMenu.value = false }
             )
         }
 
@@ -146,111 +171,132 @@ fun HomeScreen(navController: NavController) {
             enter = slideInHorizontally(initialOffsetX = { -it }),
             exit = slideOutHorizontally(targetOffsetX = { -it })
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.8f)
+                    .fillMaxSize()
                     .systemBarsPadding()
-                    .background(Color.DarkGray)
             ) {
-                Column(modifier = Modifier
-                    .fillMaxSize()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(0.15f)
-                            .background(Color(0xFF202126))
-                            .padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = User_test.login,
-                            style = TextStyle(fontSize = 22.sp),
-                            color = Color.White
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        Image(
-                            painter = painterResource(id = R.drawable.test_image),
-                            contentDescription = "профиль",
-                            modifier = Modifier
-                                .offset(-10.dp)
-                                .size(80.dp)
-                                .clip(CircleShape)
-                                .border(2.dp, Color.White, CircleShape)
-                        )
-                    }
-
-                    DrawerItem(
-                        "Настройки", Icons.Default.Settings,
-                        onClick = {
-
-                        }
-
-                    )
-
-                    Spacer(modifier = Modifier.height(1.dp))
-
-                    DrawerItem(
-                        "Профиль", Icons.Default.AccountCircle,
-                        onClick = {
-
-                        }
-
-                    )
-
-                    Spacer(modifier = Modifier.height(1.dp))
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    DrawerItem(
-                        text = "Выйти",
-                        icon = Icons.Default.ExitToApp,
-                        textColor = Color(0xFFB42424),
-                        iconTint = Color.Gray,
-                        onClick = {
-
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(1.dp))
-
-                    Row(
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.8f)
+                        .systemBarsPadding()
+                        .background(Color.DarkGray)
+                ) {
+                    GradientBackgroundHome()
+                    {
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF2F2F36))
-                            .padding(25.dp),
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.Center
                     ) {
                         Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(0.15f)
+                                .background(Color(0xFF202126))
+                                .padding(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "О приложении",
-                                style = TextStyle(fontSize = 18.sp),
-                                color = Color.Gray,
-                                modifier = Modifier.clickable {
-
-                                }
+                                text = User_test.login,
+                                style = TextStyle(fontSize = 22.sp),
+                                color = Color.White
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
 
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = "О приложении",
-                                tint = Color.Gray,
-                                modifier = Modifier.size(20.dp)
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            Image(
+                                painter = painterResource(id = R.drawable.test_image),
+                                contentDescription = "профиль",
+                                modifier = Modifier
+                                    .offset(-10.dp)
+                                    .size(80.dp)
+                                    .clip(CircleShape)
+                                    .border(2.dp, Color.White, CircleShape)
                             )
                         }
+
+                        DrawerItem(
+                            "Настройки", Icons.Default.Settings,
+                            onClick = {
+                                navController.navigate("settings")
+                            }
+
+                        )
+
+                        Spacer(modifier = Modifier.height(1.dp))
+
+                        DrawerItem(
+                            "Профиль", Icons.Default.AccountCircle,
+                            onClick = {
+                                navController.navigate("profile")
+                            }
+
+                        )
+
+                        Spacer(modifier = Modifier.height(1.dp))
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        DrawerItem(
+                            text = "Выйти",
+                            icon = Icons.Default.ExitToApp,
+                            textColor = Color(0xFFB42424),
+                            iconTint = Color.Gray,
+                            onClick = {
+                                navController.navigate("start"){
+                                    popUpTo(0) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(1.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFF2F2F36))
+                                .padding(25.dp),
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "О приложении",
+                                    style = TextStyle(fontSize = 18.sp),
+                                    color = Color.Gray,
+                                    modifier = Modifier.clickable {
+
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "О приложении",
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
-                }
+
+                }}
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { showMenu.value = false }
+                    )
+
             }
         }
     }
 }
-
 
 
 @Preview(showBackground = true)
@@ -290,5 +336,86 @@ fun DrawerItem(
                 .size(36.dp)
                 .offset(x = (-15).dp)
         )
+    }
+}
+
+@Composable
+fun ChatItem(item: ChatItemData, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(if (item.isUnread) Color(0xFF2F2F36) else Color(0xFF202126))
+            .clickable { onClick() }
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Image(
+            painter = painterResource(id = item.avatarRes),
+            contentDescription = "Avatar",
+            modifier = Modifier
+                .size(54.dp)
+                .clip(CircleShape)
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = item.nickName,
+                color = Color.White,
+                fontSize = 18.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = if (item.isMineLastMessage) "Вы: ${item.lastMessage}" else item.lastMessage,
+                color = Color.LightGray,
+                fontSize = 15.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Column(
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = item.time,
+                color = Color.Gray,
+                fontSize = 13.sp
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            when {
+                !item.isMineLastMessage && item.isUnread -> {
+                    Icon(
+                        imageVector = Icons.Filled.Circle,
+                        contentDescription = "New message",
+                        tint = Color(0xFF4CAF50),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                item.isMineLastMessage && item.isLastMessageRead -> {
+                    Icon(
+                        imageVector = Icons.Filled.DoneAll,
+                        contentDescription = "Read",
+                        tint = Color(0xFF4CAF50),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                item.isMineLastMessage && !item.isLastMessageRead -> {
+                    Icon(
+                        imageVector = Icons.Filled.Done,
+                        contentDescription = "Delivered",
+                        tint = Color(0xFFB0BEC5),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                else -> {
+                    Spacer(modifier = Modifier.size(16.dp)) // Пустота для прочитанного входящего
+                }
+            }
+        }
     }
 }
