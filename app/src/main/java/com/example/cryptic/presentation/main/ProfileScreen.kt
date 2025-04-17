@@ -37,11 +37,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.cryptic.presentation.login.User
+//import com.example.cryptic.presentation.login.User
+
 
 @Composable
 fun ProfileScreen(navController: NavHostController) {
-    var test_user = User()
+    //var test_user = User()
     var aboutText by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -84,9 +85,10 @@ fun ProfileScreen(navController: NavHostController) {
                     .padding(16.dp)
             ) {
                 Column {
-                    Text("Имя: ${test_user.login}", color = Color.White, fontSize = 24.sp)
+                    //Text("Имя: ${test_user.login}", color = Color.White, fontSize = 24.sp)
+                    Text("Имя: test", color = Color.White, fontSize = 24.sp)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Почта: ${test_user.email}", color = Color.LightGray, fontSize = 20.sp)
+                    Text("Почта: test", color = Color.LightGray, fontSize = 20.sp)
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Button(

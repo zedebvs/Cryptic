@@ -55,14 +55,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.R
 import com.example.cryptic.domain.model.ChatItemData
-import com.example.cryptic.presentation.login.User
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.DoneAll
 
 @Composable
 fun HomeScreen(navController: NavController) {
     var showMenu = remember { mutableStateOf(false) }
-    val User_test = User()
 
     GradientBackgroundHome() {
         Column(
@@ -198,7 +196,7 @@ fun HomeScreen(navController: NavController) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = User_test.login,
+                                text = "asddas",//User_test.login,
                                 style = TextStyle(fontSize = 22.sp),
                                 color = Color.White
                             )

@@ -112,13 +112,13 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                 } else {
                     emailText = ""
                     passwordText = ""
-                    emailText = ""
                     LaunchedEffect(Unit) {
                         delay(2000)
                         viewModel.resetAuthResult()
                     }
+
                     Text(
-                        "Wrong password or email/name",
+                        "Wrong password or name",
                         color = Color.Red,
                         style = TextStyle(fontSize = 20.sp),
                     )
@@ -129,7 +129,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
 
             Button(
                 onClick = {
-                    viewModel.checkCredentials(emailText, passwordText, emailText)
+                    viewModel.login(emailText, passwordText)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF0F71DE),
@@ -231,6 +231,5 @@ fun CustomTextField(
 
     )
 }
-
 
 

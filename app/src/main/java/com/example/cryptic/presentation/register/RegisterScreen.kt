@@ -20,9 +20,12 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,19 +40,32 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.presentation.start.GradientBackground
+import com.example.cryptic.ui.registration.RegisterViewModel
 
 
 @Composable
 fun RegisterScreen(navController: NavController) {
-    GradientBackground() {
-        var emailText by remember { mutableStateOf("") }
-        var passwordText by remember { mutableStateOf("") }
-        var nameText by remember { mutableStateOf("") }
-        var passwordText2 by remember { mutableStateOf("") }
+    val viewModel: RegisterViewModel = viewModel()
+    val state by viewModel.state.collectAsState()
 
+    var emailText by remember { mutableStateOf("") }
+    var passwordText by remember { mutableStateOf("") }
+    var nameText by remember { mutableStateOf("") }
+    var repeatPasswordText by remember { mutableStateOf("") }
+
+    LaunchedEffect(state) {
+        if (state is RegisterViewModel.RegistrationState.Success) {
+            navController.navigate("login") {
+                popUpTo("registration") { inclusive = true }
+            }
+        }
+    }
+
+    GradientBackground() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,30 +87,48 @@ fun RegisterScreen(navController: NavController) {
                 onValueChange = { emailText = it },
                 placeholder = "Email"
             )
+
             CustomTextField(
                 value = nameText,
                 onValueChange = { nameText = it },
                 placeholder = "Name"
             )
+
             CustomTextField(
                 value = passwordText,
                 onValueChange = { passwordText = it },
                 placeholder = "Password",
                 isPassword = true
             )
+
             CustomTextField(
-                value = passwordText2,
-                onValueChange = { passwordText2 = it },
+                value = repeatPasswordText,
+                onValueChange = { repeatPasswordText = it },
                 placeholder = "Repeat password",
                 isPassword = true
             )
+
+            if (state is RegisterViewModel.RegistrationState.Error) {
+                val error = (state as RegisterViewModel.RegistrationState.Error).message
+                Text(
+                    text = error,
+                    color = Color.Red,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
-
+                    viewModel.register(
+                        email = emailText,
+                        name = nameText,
+                        password = passwordText,
+                        repeatPassword = repeatPasswordText
+                    )
                 },
+                enabled = state !is RegisterViewModel.RegistrationState.Loading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF0F71DE),
                     contentColor = Color.White
@@ -106,11 +140,16 @@ fun RegisterScreen(navController: NavController) {
                     .height(64.dp),
                 shape = RoundedCornerShape(20.dp),
             ) {
-                Text(
-                    text = "Sign Up",
-                    style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                )
+                if (state is RegisterViewModel.RegistrationState.Loading) {
+                    CircularProgressIndicator(color = Color.White)
+                } else {
+                    Text(
+                        text = "Sign Up",
+                        style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                    )
+                }
             }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
