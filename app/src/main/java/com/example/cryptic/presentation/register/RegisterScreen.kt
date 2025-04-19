@@ -43,19 +43,22 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.cryptic.di.LocalRegistrationRepository
 import com.example.cryptic.presentation.start.GradientBackground
 import com.example.cryptic.ui.registration.RegisterViewModel
 
-
 @Composable
 fun RegisterScreen(navController: NavController) {
-    val viewModel: RegisterViewModel = viewModel()
-    val state by viewModel.state.collectAsState()
+    val registerRepository = LocalRegistrationRepository.current
+    val viewModel: RegisterViewModel = viewModel(
+        factory = RegisterViewModelFactory(registerRepository)
+    )
 
-    var emailText by remember { mutableStateOf("") }
-    var passwordText by remember { mutableStateOf("") }
-    var nameText by remember { mutableStateOf("") }
-    var repeatPasswordText by remember { mutableStateOf("") }
+        var emailText by remember { mutableStateOf("") }
+        var nameText by remember { mutableStateOf("") }
+        var passwordText by remember { mutableStateOf("") }
+        var repeatPasswordText by remember { mutableStateOf("") }
+        val state by viewModel.state.collectAsState()
 
     LaunchedEffect(state) {
         if (state is RegisterViewModel.RegistrationState.Success) {
@@ -233,3 +236,4 @@ fun StartScreenPreview() {
     val navController = rememberNavController()
     RegisterScreen(navController = navController)
 }
+

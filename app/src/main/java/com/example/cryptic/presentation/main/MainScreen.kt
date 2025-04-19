@@ -51,15 +51,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.R
 import com.example.cryptic.domain.model.ChatItemData
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.runtime.collectAsState
+import androidx.navigation.NavHostController
+import androidx.compose.runtime.getValue
+import com.example.cryptic.di.LocalMainViewModel
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavHostController) {
+    val mainViewModel = LocalMainViewModel.current
+    val profile by mainViewModel.profile.collectAsState()
+
     var showMenu = remember { mutableStateOf(false) }
 
     GradientBackgroundHome() {
@@ -183,126 +189,120 @@ fun HomeScreen(navController: NavController) {
                 ) {
                     GradientBackgroundHome()
                     {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight(0.15f)
-                                .background(Color(0xFF202126))
-                                .padding(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "asddas",//User_test.login,
-                                style = TextStyle(fontSize = 22.sp),
-                                color = Color.White
-                            )
-
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            Image(
-                                painter = painterResource(id = R.drawable.test_image),
-                                contentDescription = "профиль",
-                                modifier = Modifier
-                                    .offset(-10.dp)
-                                    .size(80.dp)
-                                    .clip(CircleShape)
-                                    .border(2.dp, Color.White, CircleShape)
-                            )
-                        }
-
-                        DrawerItem(
-                            "Настройки", Icons.Default.Settings,
-                            onClick = {
-                                navController.navigate("settings")
-                            }
-
-                        )
-
-                        Spacer(modifier = Modifier.height(1.dp))
-
-                        DrawerItem(
-                            "Профиль", Icons.Default.AccountCircle,
-                            onClick = {
-                                navController.navigate("profile")
-                            }
-
-                        )
-
-                        Spacer(modifier = Modifier.height(1.dp))
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        DrawerItem(
-                            text = "Выйти",
-                            icon = Icons.Default.ExitToApp,
-                            textColor = Color(0xFFB42424),
-                            iconTint = Color.Gray,
-                            onClick = {
-                                navController.navigate("start"){
-                                    popUpTo(0) {
-                                        inclusive = true
-                                    }
-                                }
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.height(1.dp))
-
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color(0xFF2F2F36))
-                                .padding(25.dp),
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.Center
                         ) {
                             Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight(0.15f)
+                                    .background(Color(0xFF202126))
+                                    .padding(10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "О приложении",
+                                    text = profile?.name ?: "Гость",
                                     style = TextStyle(fontSize = 18.sp),
-                                    color = Color.Gray,
-                                    modifier = Modifier.clickable {
-
-                                    }
+                                    color = Color.White
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
 
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "О приложении",
-                                    tint = Color.Gray,
-                                    modifier = Modifier.size(20.dp)
+                                Spacer(modifier = Modifier.weight(1f))
+
+                                Image(
+                                    painter = painterResource(id = R.drawable.test_image),
+                                    contentDescription = "профиль",
+                                    modifier = Modifier
+                                        .offset(-10.dp)
+                                        .size(80.dp)
+                                        .clip(CircleShape)
+                                        .border(2.dp, Color.White, CircleShape)
                                 )
                             }
+
+                            DrawerItem(
+                                "Настройки", Icons.Default.Settings,
+                                onClick = {
+                                    navController.navigate("settings")
+                                }
+
+                            )
+
+                            Spacer(modifier = Modifier.height(1.dp))
+
+                            DrawerItem(
+                                "Профиль", Icons.Default.AccountCircle,
+                                onClick = {
+                                    navController.navigate("profile")
+                                }
+
+                            )
+
+                            Spacer(modifier = Modifier.height(1.dp))
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            DrawerItem(
+                                text = "Выйти",
+                                icon = Icons.Default.ExitToApp,
+                                textColor = Color(0xFFB42424),
+                                iconTint = Color.Gray,
+                                onClick = {
+                                    mainViewModel.logout()
+                                    navController.navigate("start"){
+                                        popUpTo(0) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(1.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFF2F2F36))
+                                    .padding(25.dp),
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "О приложении",
+                                        style = TextStyle(fontSize = 18.sp),
+                                        color = Color.Gray,
+                                        modifier = Modifier.clickable {
+
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Icon(
+                                        imageVector = Icons.Default.Info,
+                                        contentDescription = "О приложении",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
                         }
-                    }
 
-                }}
+                    }}
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { showMenu.value = false }
-                    )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { showMenu.value = false }
+                )
 
             }
         }
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScre() {
-    val navController = rememberNavController()
-    HomeScreen(navController = navController)
-}
 
 @Composable
 fun DrawerItem(

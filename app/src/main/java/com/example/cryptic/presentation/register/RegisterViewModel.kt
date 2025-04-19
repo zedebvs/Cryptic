@@ -2,13 +2,13 @@ package com.example.cryptic.ui.registration
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cryptic.data.repository.AuthRepository
+import com.example.cryptic.data.repository.RegisterRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class RegisterViewModel(
-    private val authRepository: AuthRepository = AuthRepository()
+    private val registerRepository: RegisterRepository
 ) : ViewModel() {
 
     sealed class RegistrationState {
@@ -50,7 +50,7 @@ class RegisterViewModel(
         _state.value = RegistrationState.Loading
 
         viewModelScope.launch {
-            val result = authRepository.register(email, name, password)
+            val result = registerRepository.register(email, name, password)
 
             _state.value = when {
                 result.isSuccess -> RegistrationState.Success

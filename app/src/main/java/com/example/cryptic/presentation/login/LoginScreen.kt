@@ -23,10 +23,12 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,15 +46,21 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.cryptic.di.LocalAuthRepository
+import com.example.cryptic.di.LocalMainViewModel
 import com.example.cryptic.presentation.start.GradientBackground
-import kotlinx.coroutines.delay
 
 @Composable
-fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
-    GradientBackground() {
+fun LoginScreen(navController: NavController) {
+    val authRepository = LocalAuthRepository.current
+    val viewModel: LoginViewModel = viewModel(
+        factory = LoginViewModelFactory(authRepository)
+    )
+
+    GradientBackground {
         var emailText by remember { mutableStateOf("") }
         var passwordText by remember { mutableStateOf("") }
-        val authResult by viewModel.authResult
+        val state by viewModel.state.collectAsState()
         val scrollState = rememberScrollState()
 
         Column(
@@ -76,7 +84,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
             CustomTextField(
                 value = emailText,
                 onValueChange = { emailText = it },
-                placeholder = "Email/Login"
+                placeholder = "Login"
             )
 
             CustomTextField(
@@ -100,30 +108,32 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                     },
                 )
             }
-            authResult?.let { isSuccess ->
-                if (isSuccess) {
-                    viewModel.resetAuthResult()
-                    Text("success!", color = Color.Green)
-                    navController.navigate("home"){
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                    }
-                } else {
-                    emailText = ""
-                    passwordText = ""
-                    LaunchedEffect(Unit) {
-                        delay(2000)
-                        viewModel.resetAuthResult()
-                    }
-
+            when (state) {
+                is LoginViewModel.LoginState.Loading -> {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.padding(16.dp))
+                }
+                is LoginViewModel.LoginState.Error -> {
                     Text(
-                        "Wrong password or name",
+                        text = (state as LoginViewModel.LoginState.Error).message,
                         color = Color.Red,
                         style = TextStyle(fontSize = 20.sp),
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
+                is LoginViewModel.LoginState.Success -> {
+                    val mainViewModel = LocalMainViewModel.current
+                    val userProfile = (state as LoginViewModel.LoginState.Success).profile
+
+                    LaunchedEffect(Unit) {
+                        mainViewModel.setProfile(userProfile)
+                        navController.navigate("home") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
+                else -> {}
             }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -231,5 +241,4 @@ fun CustomTextField(
 
     )
 }
-
 
