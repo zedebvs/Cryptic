@@ -56,9 +56,11 @@ import com.example.cryptic.R
 import com.example.cryptic.domain.model.ChatItemData
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.getValue
+import coil.compose.AsyncImage
 import com.example.cryptic.di.LocalMainViewModel
 
 @Composable
@@ -67,7 +69,10 @@ fun HomeScreen(navController: NavHostController) {
     val profile by mainViewModel.profile.collectAsState()
 
     var showMenu = remember { mutableStateOf(false) }
-
+    val imageUrl = profile?.avatar
+    LaunchedEffect(Unit) {
+        mainViewModel.fetchProfile()
+    }
     GradientBackgroundHome() {
         Column(
             modifier = Modifier
@@ -209,15 +214,24 @@ fun HomeScreen(navController: NavHostController) {
 
                                 Spacer(modifier = Modifier.weight(1f))
 
-                                Image(
-                                    painter = painterResource(id = R.drawable.test_image),
-                                    contentDescription = "профиль",
+                                AsyncImage(
+                                    model = imageUrl,
+                                    contentDescription = null,
                                     modifier = Modifier
                                         .offset(-10.dp)
                                         .size(80.dp)
                                         .clip(CircleShape)
                                         .border(2.dp, Color.White, CircleShape)
                                 )
+//                                Image(
+//                                    painter = painterResource(id = R.drawable.test_image),
+//                                    contentDescription = "профиль",
+//                                    modifier = Modifier
+//                                        .offset(-10.dp)
+//                                        .size(80.dp)
+//                                        .clip(CircleShape)
+//                                        .border(2.dp, Color.White, CircleShape)
+//                                )
                             }
 
                             DrawerItem(

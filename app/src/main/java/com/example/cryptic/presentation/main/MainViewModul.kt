@@ -1,12 +1,16 @@
 package com.example.cryptic.presentation.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.cryptic.data.api.models.PublicProfile
 import com.example.cryptic.data.repository.AuthRepository
+import com.example.cryptic.data.repository.ProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class MainViewModel(
+    private val profileRepository: ProfileRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -19,5 +23,16 @@ class MainViewModel(
 
     fun logout() {
         authRepository.logout()
+    }
+
+    fun fetchProfile() {
+        viewModelScope.launch {
+            val result = profileRepository.getPublicProfile()
+            if (result.isSuccess) {
+                _profile.value = result.getOrNull()
+            } else {
+                _profile.value = null
+            }
+        }
     }
 }

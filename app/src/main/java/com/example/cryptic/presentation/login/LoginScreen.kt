@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -62,6 +63,7 @@ fun LoginScreen(navController: NavController) {
         var passwordText by remember { mutableStateOf("") }
         val state by viewModel.state.collectAsState()
         val scrollState = rememberScrollState()
+        val keyboardController = LocalSoftwareKeyboardController.current
 
         Column(
             modifier = Modifier
@@ -134,11 +136,11 @@ fun LoginScreen(navController: NavController) {
                 else -> {}
             }
 
-
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
+                    keyboardController?.hide()
                     viewModel.login(emailText, passwordText)
                 },
                 colors = ButtonDefaults.buttonColors(

@@ -13,25 +13,35 @@ class TokenRefreshInterceptor(
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
-        val response = chain.proceed(request)
+        var response = chain.proceed(request)
 
         if (response.code == 401) {
             synchronized(this) {
+                response.close() // закрываем старый response
+
                 val refreshToken = tokenManager.getRefreshToken()
                 if (refreshToken != null) {
-                    val refreshResponse = runBlocking { // error runBlocking {
-                        apiService.refreshToken(RefreshRequest(refreshToken)).execute() // error execute()
+                    val refreshResponse = runBlocking {
+                        apiService.refreshToken(RefreshRequest(refreshToken)).execute()
                     }
 
-                    if (refreshResponse.isSuccessful) { // isSuccessful) error
-                        val newAccessToken = refreshResponse.body()!!.accessToken //error .body()!!.accessToken
-                        tokenManager.saveAccessToken(newAccessToken)
-                        val newRequest = request.newBuilder()
-                            .header("Authorization", "Bearer $newAccessToken")
-                            .build()
-                        response.close()
-                        return chain.proceed(newRequest)
+                    if (refreshResponse.isSuccessful) {
+                        val newAccessToken = refreshResponse.body()?.accessToken
+
+                        if (newAccessToken != null) {
+                            tokenManager.saveAccessToken(newAccessToken)
+
+                            val newRequest = request.newBuilder()
+                                .header("Authorization", "Bearer $newAccessToken")
+                                .build()
+
+                            return chain.proceed(newRequest)
+                        } else {
+                            // если refresh прошел, но token не пришёл
+                            tokenManager.clearTokens()
+                        }
                     } else {
+                        // refresh не успешен
                         tokenManager.clearTokens()
                     }
                 }

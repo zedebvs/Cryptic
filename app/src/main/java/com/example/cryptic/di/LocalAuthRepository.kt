@@ -5,6 +5,7 @@ import com.example.cryptic.data.repository.AuthRepository
 import com.example.cryptic.data.repository.RegisterRepository
 import com.example.cryptic.data.local.TokenManager
 import com.example.cryptic.presentation.main.MainViewModel
+import com.example.cryptic.presentation.main.ProfileViewModel
 
 val LocalMainViewModel = staticCompositionLocalOf<MainViewModel> {
     error("No MainViewModel provided")
@@ -20,4 +21,8 @@ val LocalAuthRepository = staticCompositionLocalOf<AuthRepository> {
 
 val LocalRegistrationRepository = staticCompositionLocalOf<RegisterRepository> {
     error("No RegistrationRepository provided")
+}
+
+val LocalProfileViewModel = staticCompositionLocalOf<ProfileViewModel> {
+    error("No ProfileViewModel provided")
 }

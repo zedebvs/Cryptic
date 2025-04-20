@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -59,6 +62,8 @@ fun RegisterScreen(navController: NavController) {
         var passwordText by remember { mutableStateOf("") }
         var repeatPasswordText by remember { mutableStateOf("") }
         val state by viewModel.state.collectAsState()
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val scrollState = rememberScrollState()
 
     LaunchedEffect(state) {
         if (state is RegisterViewModel.RegistrationState.Success) {
@@ -73,6 +78,7 @@ fun RegisterScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .systemBarsPadding()
+                .verticalScroll(scrollState)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -124,6 +130,7 @@ fun RegisterScreen(navController: NavController) {
 
             Button(
                 onClick = {
+                    keyboardController?.hide()
                     viewModel.register(
                         email = emailText,
                         name = nameText,

@@ -13,13 +13,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.Network.RetrofitClient
 import com.example.cryptic.data.local.TokenManager
 import com.example.cryptic.data.repository.AuthRepository
+import com.example.cryptic.data.repository.ProfileRepository
 import com.example.cryptic.data.repository.RegisterRepository
 import com.example.cryptic.di.LocalAuthRepository
 import com.example.cryptic.di.LocalTokenManager
 import com.example.cryptic.di.LocalRegistrationRepository
 import com.example.cryptic.di.LocalMainViewModel
+import com.example.cryptic.di.LocalProfileViewModel
 import com.example.cryptic.presentation.login.LoginScreen
 import com.example.cryptic.presentation.main.MainViewModel
+import com.example.cryptic.presentation.main.ProfileViewModel
 import com.example.cryptic.presentation.navigator.AppNavGraph
 
 
@@ -32,13 +35,16 @@ class MainActivity : ComponentActivity() {
         val apiService = RetrofitClient.getApiServiceWithRefresh(tokenManager)
         val authRepository = AuthRepository(apiService, tokenManager)
         val registerRepository = RegisterRepository(apiService)
+        val profileRepository = ProfileRepository(apiService)
+        val profileViewModel = ProfileViewModel(profileRepository, authRepository)
 
         setContent {
             CompositionLocalProvider(
-                LocalMainViewModel provides MainViewModel(authRepository),
+                LocalMainViewModel provides MainViewModel(profileRepository, authRepository),
                 LocalRegistrationRepository provides registerRepository,
                 LocalAuthRepository provides authRepository,
-                LocalTokenManager provides tokenManager
+                LocalTokenManager provides tokenManager,
+                LocalProfileViewModel provides profileViewModel
             ) {
                 val navController = rememberNavController()
                 AppNavGraph(navController = navController)

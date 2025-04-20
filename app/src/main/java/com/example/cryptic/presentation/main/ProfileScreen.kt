@@ -1,6 +1,8 @@
 package com.example.cryptic.presentation.main
 
-import androidx.compose.foundation.Image
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,23 +34,58 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import com.example.cryptic.di.LocalProfileViewModel
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import java.io.File
+import okhttp3.RequestBody.Companion.asRequestBody
+import androidx.compose.ui.platform.LocalContext
+
 //import com.example.cryptic.presentation.login.User
 
 
 @Composable
 fun ProfileScreen(navController: NavHostController) {
-    //var test_user = User()
+
+    val profileViewModel = LocalProfileViewModel.current
+    val privateProfile by profileViewModel.profile.collectAsState()
     var aboutText by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     val keyboardController = LocalSoftwareKeyboardController.current
+    val imageUrl = privateProfile?.avatar
+    val context = LocalContext.current
 
+    LaunchedEffect(privateProfile) {
+        privateProfile?.status?.let {
+            aboutText = it
+        }
+    }
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchProfile()
+    }
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            // Создаём временный файл
+            val inputStream = context.contentResolver.openInputStream(it)
+            val tempFile = File(context.cacheDir, "avatar_temp.jpg")
+            tempFile.outputStream().use { fileOut ->
+                inputStream?.copyTo(fileOut)
+            }
+
+            // Создаём MultipartBody
+            val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file", tempFile.name, requestFile)
+
+            // Отправляем на сервер
+            profileViewModel.uploadAvatar(body)
+        }}
     GradientBackgroundHome() {
         Column(
             modifier = Modifier
@@ -64,13 +103,19 @@ fun ProfileScreen(navController: NavHostController) {
                     .clip(CircleShape)
                     .background(Color.Gray)
             ) {
-                Image(
-                    painter = painterResource(id = com.example.cryptic.R.drawable.test_image),
-                    contentDescription = "Аватар",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize()
+
                 )
+//                Image(
+//                    painter = painterResource(id = com.example.cryptic.R.drawable.test_image),
+//                    contentDescription = "Аватар",
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .clip(CircleShape)
+//                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -86,14 +131,14 @@ fun ProfileScreen(navController: NavHostController) {
             ) {
                 Column {
                     //Text("Имя: ${test_user.login}", color = Color.White, fontSize = 24.sp)
-                    Text("Имя: test", color = Color.White, fontSize = 24.sp)
+                    Text("Имя: ${privateProfile?.name ?: "Загрузка..."}", color = Color.White, fontSize = 24.sp)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Почта: test", color = Color.LightGray, fontSize = 20.sp)
+                    Text("Почта: ${privateProfile?.email ?: "Загрузка..."}", color = Color.LightGray, fontSize = 20.sp)
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
                         onClick = {
-
+                            pickImageLauncher.launch("image/*")
                         },
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
@@ -106,7 +151,6 @@ fun ProfileScreen(navController: NavHostController) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
 
             Box(
                 modifier = Modifier
@@ -131,6 +175,7 @@ fun ProfileScreen(navController: NavHostController) {
 
                     Button(
                         onClick = {
+                            profileViewModel.updateStatus(aboutText)
                             keyboardController?.hide()
                         },
                         shape = RoundedCornerShape(16.dp),
@@ -147,6 +192,7 @@ fun ProfileScreen(navController: NavHostController) {
 
             Button(
                 onClick = {
+                    profileViewModel.logout()
                     navController.navigate("start") {
                         popUpTo(0) { inclusive = true }
                     }
@@ -163,9 +209,11 @@ fun ProfileScreen(navController: NavHostController) {
         }
     }
 }
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreen1() {
-    val navController = rememberNavController()
-    ProfileScreen(navController = navController)
-}
+
+
+//@Preview(showBackground = true)
+//@Composable
+//fun ProfileScreen1() {
+//    val navController = rememberNavController()
+//    ProfileScreen(navController = navController, viewModelviewModel)
+//}

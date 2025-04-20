@@ -39,6 +39,7 @@ fun StartScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         if (!tokenManager.getAccessToken().isNullOrEmpty()) {
+
             navController.navigate("home") {
                 popUpTo("start") { inclusive = true }
             }

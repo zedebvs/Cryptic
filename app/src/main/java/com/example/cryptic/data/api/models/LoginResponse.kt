@@ -19,5 +19,16 @@ data class PublicProfile(
     val status: String?
 )
 
+data class PrivateProfile(
+    val id: Int,
+    val name: String,
+    val email: String,
+    val avatar: String,
+    val status: String?
+)
+
 data class RefreshRequest(val refreshToken: String)
 data class RefreshResponse(val accessToken: String)
+
+data class UpdateStatus(val status: String) // отправляем
+data class NewStatus(val status: String)    // получаем
