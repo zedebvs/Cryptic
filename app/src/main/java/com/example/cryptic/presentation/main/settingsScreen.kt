@@ -22,6 +22,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.example.cryptic.di.LocalSettingsViewModel
 
 data class SettingOption(
     val title: String,
@@ -32,10 +37,13 @@ data class SettingOption(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavHostController) {
+    val showChangeNicknameDialog = remember { mutableStateOf(false) }
+    val settingsViewModel = LocalSettingsViewModel.current
+    val message = settingsViewModel.incomingMessages.collectAsState()
 
     val profileSettings = listOf(
         SettingOption("Сменить никнейм", Icons.Default.Edit) {
-
+            showChangeNicknameDialog.value = true
         },
         SettingOption("Сменить почту", Icons.Default.Email) {
 
@@ -95,6 +103,24 @@ fun SettingsScreen(navController: NavHostController) {
             )
         }
     ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .background(Color(0xFF202126))
+                .padding(16.dp)
+        ) {
+            if (message != null) {
+                Text(
+                    text = message.value ?: "",
+                    color = Color(0xFF3DDC84),
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .background(Color(0xFF2F2F36))
+                        .padding(12.dp)
+                )
+            }
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -102,6 +128,7 @@ fun SettingsScreen(navController: NavHostController) {
                 .background(Color(0xFF202126))
                 .padding(16.dp)
         ) {
+
             item {
                 SettingSection("Профиль", profileSettings)
             }
@@ -119,8 +146,54 @@ fun SettingsScreen(navController: NavHostController) {
             }
         }
     }
-}
+    if (showChangeNicknameDialog.value) {
+        ChangeNicknameDialog(
+            onDismiss = { showChangeNicknameDialog.value = false },
+            onConfirm = { newNickname ->
+                showChangeNicknameDialog.value = false
+                settingsViewModel.changeNickname(newNickname)
+            }
+        )
+    }
+}}
 
+
+@Composable
+fun ChangeNicknameDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    val nickname = remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(nickname.value) },
+                enabled = nickname.value.isNotBlank()
+            ) {
+                Text("ОК")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Отмена")
+            }
+        },
+        title = { Text("Сменить никнейм", fontWeight = FontWeight.Bold) },
+        text = {
+            OutlinedTextField(
+                value = nickname.value,
+                onValueChange = { nickname.value = it },
+                label = { Text("Новый ник") },
+                singleLine = true
+            )
+        },
+        containerColor = Color(0xFF2F2F36),
+        titleContentColor = Color.White,
+        textContentColor = Color.White
+
+    )
+}
 @Composable
 fun SettingSection(title: String, options: List<SettingOption>) {
     Column {

@@ -15,18 +15,24 @@ import com.example.cryptic.data.local.TokenManager
 import com.example.cryptic.data.repository.AuthRepository
 import com.example.cryptic.data.repository.ProfileRepository
 import com.example.cryptic.data.repository.RegisterRepository
+import com.example.cryptic.data.repository.SocketRepository
 import com.example.cryptic.di.LocalAuthRepository
 import com.example.cryptic.di.LocalTokenManager
 import com.example.cryptic.di.LocalRegistrationRepository
 import com.example.cryptic.di.LocalMainViewModel
 import com.example.cryptic.di.LocalProfileViewModel
+import com.example.cryptic.di.LocalSettingsViewModel
 import com.example.cryptic.presentation.login.LoginScreen
 import com.example.cryptic.presentation.main.MainViewModel
 import com.example.cryptic.presentation.main.ProfileViewModel
+import com.example.cryptic.presentation.main.SettingsViewModel
 import com.example.cryptic.presentation.navigator.AppNavGraph
 
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var settingsViewModel: SettingsViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -37,6 +43,10 @@ class MainActivity : ComponentActivity() {
         val registerRepository = RegisterRepository(apiService)
         val profileRepository = ProfileRepository(apiService)
         val profileViewModel = ProfileViewModel(profileRepository, authRepository)
+        val socketRepository = SocketRepository(tokenManager, apiService)
+
+        val settingsViewModel = SettingsViewModel(socketRepository)
+        //settingsViewModel.connect()
 
         setContent {
             CompositionLocalProvider(
@@ -44,11 +54,16 @@ class MainActivity : ComponentActivity() {
                 LocalRegistrationRepository provides registerRepository,
                 LocalAuthRepository provides authRepository,
                 LocalTokenManager provides tokenManager,
-                LocalProfileViewModel provides profileViewModel
+                LocalProfileViewModel provides profileViewModel,
+                LocalSettingsViewModel provides settingsViewModel
             ) {
                 val navController = rememberNavController()
                 AppNavGraph(navController = navController)
             }
         }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        settingsViewModel.close()  // вот тут закрываем сокет
     }
 }

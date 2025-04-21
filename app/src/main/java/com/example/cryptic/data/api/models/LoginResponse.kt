@@ -32,3 +32,10 @@ data class RefreshResponse(val accessToken: String)
 
 data class UpdateStatus(val status: String) // отправляем
 data class NewStatus(val status: String)    // получаем
+
+data class UserData(
+    val id: String,
+    val name: String,
+    val avatarUrl: String,
+    val isOnline: Boolean
+)

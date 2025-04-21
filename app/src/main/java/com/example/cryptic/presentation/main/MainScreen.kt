@@ -48,10 +48,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.R
 import com.example.cryptic.domain.model.ChatItemData
 import androidx.compose.foundation.lazy.items
@@ -62,16 +60,21 @@ import androidx.navigation.NavHostController
 import androidx.compose.runtime.getValue
 import coil.compose.AsyncImage
 import com.example.cryptic.di.LocalMainViewModel
+import com.example.cryptic.di.LocalSettingsViewModel
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val mainViewModel = LocalMainViewModel.current
     val profile by mainViewModel.profile.collectAsState()
+    val settingsViewModel = LocalSettingsViewModel.current
 
     var showMenu = remember { mutableStateOf(false) }
     val imageUrl = profile?.avatar
     LaunchedEffect(Unit) {
         mainViewModel.fetchProfile()
+    }
+    LaunchedEffect(Unit) {
+        settingsViewModel.connect()
     }
     GradientBackgroundHome() {
         Column(
@@ -262,6 +265,7 @@ fun HomeScreen(navController: NavHostController) {
                                 textColor = Color(0xFFB42424),
                                 iconTint = Color.Gray,
                                 onClick = {
+                                    settingsViewModel.close()
                                     mainViewModel.logout()
                                     navController.navigate("start"){
                                         popUpTo(0) {
