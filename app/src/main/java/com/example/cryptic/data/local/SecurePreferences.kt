@@ -29,7 +29,7 @@ class TokenManager(context: Context) {
 
     fun saveAccessToken(token: String) {
         prefs.edit().putString("access_token", token).apply()
-        runBlocking { _tokenUpdatedEvent.emit(Unit) } // уведомляем о новом токене
+        runBlocking { _tokenUpdatedEvent.emit(Unit) }
     }
     fun getAccessToken(): String? = prefs.getString("access_token", null)
 

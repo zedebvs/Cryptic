@@ -1,6 +1,7 @@
 package com.example.cryptic.data.api.models
 
 import com.google.gson.annotations.SerializedName
+import java.time.LocalDateTime
 
 data class LoginResponse(
     @SerializedName("tokens") val tokens: Tokens,
@@ -16,7 +17,9 @@ data class PublicProfile(
     val id: Int,
     val name: String,
     val avatar: String,
-    val status: String?
+    val status: String?,
+    val online: Int,
+    val lastOnline: String?
 )
 
 data class PrivateProfile(
@@ -24,7 +27,8 @@ data class PrivateProfile(
     val name: String,
     val email: String,
     val avatar: String,
-    val status: String?
+    val status: String?,
+    val online: Int
 )
 
 data class RefreshRequest(val refreshToken: String)

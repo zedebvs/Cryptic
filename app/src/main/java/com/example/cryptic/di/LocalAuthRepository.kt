@@ -7,6 +7,7 @@ import com.example.cryptic.data.local.TokenManager
 import com.example.cryptic.data.repository.SocketRepository
 import com.example.cryptic.presentation.main.MainViewModel
 import com.example.cryptic.presentation.main.ProfileViewModel
+import com.example.cryptic.presentation.main.SearchViewModel
 import com.example.cryptic.presentation.main.SettingsViewModel
 
 val LocalMainViewModel = staticCompositionLocalOf<MainViewModel> {
@@ -30,5 +31,9 @@ val LocalProfileViewModel = staticCompositionLocalOf<ProfileViewModel> {
 }
 
 val LocalSettingsViewModel = staticCompositionLocalOf<SettingsViewModel> {
+    error("No SocketRepository provided")
+}
+
+val LocalSearchViewModel = staticCompositionLocalOf<SearchViewModel> {
     error("No SocketRepository provided")
 }

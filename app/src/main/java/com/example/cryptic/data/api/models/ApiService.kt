@@ -19,6 +19,7 @@ import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("/auth/login")
@@ -45,5 +46,9 @@ interface ApiService {
         @Part file: MultipartBody.Part
     ): Response<Unit>
 
+    @GET("/profiles/search")
+    suspend fun searchUsers(
+        @Query("query") query: String
+    ): Response<List<PublicProfile>>
 }
 

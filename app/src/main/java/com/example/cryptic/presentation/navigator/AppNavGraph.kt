@@ -11,6 +11,7 @@ import com.example.cryptic.presentation.login.LoginScreen
 import com.example.cryptic.presentation.main.HomeScreen
 import com.example.cryptic.presentation.main.ProfileScreen
 import com.example.cryptic.presentation.main.SettingsScreen
+import com.example.cryptic.presentation.main.UserSearchScreen
 import com.example.cryptic.presentation.register.RegisterScreen
 import com.example.cryptic.presentation.start.StartScreen
 
@@ -40,6 +41,9 @@ fun AppNavGraph(navController: NavHostController) {
         }
         composable("exit") {
             HomeScreen(navController)
+        }
+        composable("search") {
+            UserSearchScreen(navController)
         }
     }
 }

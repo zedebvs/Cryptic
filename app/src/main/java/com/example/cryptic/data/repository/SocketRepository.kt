@@ -24,7 +24,6 @@ class SocketRepository(
             _incomingMessages.value = message
         }
 
-        // ловим событие обновления токена
         tokenManager.tokenUpdatedEvent
             .onEach {
                 WebSocketClient.close()

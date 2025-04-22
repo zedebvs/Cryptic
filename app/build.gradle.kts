@@ -55,7 +55,7 @@ dependencies {
 
     implementation("androidx.compose.ui:ui:1.5.3")
     implementation("androidx.compose.ui:ui-tooling-preview:1.5.3")
-    implementation("androidx.compose.material3:material3:1.1.2")
+    implementation("androidx.compose.material3:material3:1.2.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling:1.5.3")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.3")
@@ -79,7 +79,6 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:2.3.4")
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-compiler:2.50")
-
     // Retrofit
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")

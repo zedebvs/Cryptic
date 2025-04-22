@@ -59,6 +59,7 @@ fun ProfileScreen(navController: NavHostController) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val imageUrl = privateProfile?.avatar
     val context = LocalContext.current
+    val online = privateProfile?.online ?: 0
 
     LaunchedEffect(privateProfile) {
         privateProfile?.status?.let {
@@ -72,18 +73,16 @@ fun ProfileScreen(navController: NavHostController) {
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            // Создаём временный файл
+
             val inputStream = context.contentResolver.openInputStream(it)
             val tempFile = File(context.cacheDir, "avatar_temp.jpg")
             tempFile.outputStream().use { fileOut ->
                 inputStream?.copyTo(fileOut)
             }
 
-            // Создаём MultipartBody
             val requestFile = tempFile.asRequestBody("image/*".toMediaTypeOrNull())
             val body = MultipartBody.Part.createFormData("file", tempFile.name, requestFile)
 
-            // Отправляем на сервер
             profileViewModel.uploadAvatar(body)
         }}
     GradientBackgroundHome() {
@@ -119,9 +118,13 @@ fun ProfileScreen(navController: NavHostController) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text("🟢 В сети", color = Color(0xFF4CAF50), fontSize = 18.sp)
+            if (online > 0) {
+                Text("🟢 В сети", color = Color(0xFF4CAF50), fontSize = 18.sp)
+            } else {
+                Text("🔴 Не в сети", color = Color.Red, fontSize = 18.sp)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            }
+                Spacer(modifier = Modifier.height(16.dp))
 
             Box(
                 modifier = Modifier

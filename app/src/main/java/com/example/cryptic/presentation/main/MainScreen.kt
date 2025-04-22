@@ -119,7 +119,9 @@ fun HomeScreen(navController: NavHostController) {
                 )
 
                 IconButton(
-                    onClick = { },
+                    onClick = {
+                        navController.navigate("search")
+                    },
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
                     Icon(

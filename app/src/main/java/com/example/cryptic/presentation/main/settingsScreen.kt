@@ -22,11 +22,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.example.cryptic.di.LocalSettingsViewModel
+import kotlinx.coroutines.delay
 
 data class SettingOption(
     val title: String,
@@ -34,12 +36,48 @@ data class SettingOption(
     val onClick: () -> Unit
 )
 
+@Composable
+fun FloatingMessage(message: String?) {
+    if (!message.isNullOrEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 100.dp)
+                .padding(16.dp),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Card(
+                modifier = Modifier.padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Transparent
+                )
+            ) {
+                Text(
+                    text = message,
+                    color = if (message.startsWith("Ошибка")) Color.Red else Color(0xFF3DDC84),
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavHostController) {
     val showChangeNicknameDialog = remember { mutableStateOf(false) }
     val settingsViewModel = LocalSettingsViewModel.current
     val message = settingsViewModel.incomingMessages.collectAsState()
+    val showFloatingMessage = remember { mutableStateOf(false) }
+
+    if (showFloatingMessage.value) {
+        LaunchedEffect(showFloatingMessage.value) {
+            delay(2000)
+            showFloatingMessage.value = false
+        }
+    }
 
     val profileSettings = listOf(
         SettingOption("Сменить никнейм", Icons.Default.Edit) {
@@ -54,9 +92,6 @@ fun SettingsScreen(navController: NavHostController) {
         SettingOption("Изменить аватар", Icons.Default.Person) {
 
         }
-//        SettingOption("Задать статус", Icons.Default.PersonPin) {
-//
-//        }
     )
 
     val securitySettings = listOf(
@@ -92,76 +127,66 @@ fun SettingsScreen(navController: NavHostController) {
         }
     )
 
-    Scaffold(
-        containerColor = Color(0xFF202126),
-        topBar = {
-            TopAppBar(
-                title = { Text("Настройки", color = Color.White) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF2F2F36)
-                )
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = Color(0xFF202126),
+            topBar = {
+                TopAppBar(
+                    title = { Text("Настройки", color = Color.White) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color(0xFF2F2F36)
+                    ))
+            }
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .background(Color(0xFF202126))
+                    .padding(16.dp)
+            ) {
+                item {
+                    SettingSection("Профиль", profileSettings)
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SettingSection("Безопасность", securitySettings)
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SettingSection("Данные", dataSettings)
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SettingSection("Приложение", appSettings)
+                }
+            }
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .background(Color(0xFF202126))
-                .padding(16.dp)
-        ) {
-            if (message != null) {
-                Text(
-                    text = message.value ?: "",
-                    color = Color(0xFF3DDC84),
-                    fontSize = 16.sp,
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .background(Color(0xFF2F2F36))
-                        .padding(12.dp)
-                )
-            }
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .background(Color(0xFF202126))
-                .padding(16.dp)
-        ) {
 
-            item {
-                SettingSection("Профиль", profileSettings)
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingSection("Безопасность", securitySettings)
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingSection("Данные", dataSettings)
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                SettingSection("Приложение", appSettings)
-            }
+        if (showFloatingMessage.value && !message.value.isNullOrEmpty()) {
+            FloatingMessage(message.value)
         }
     }
+
     if (showChangeNicknameDialog.value) {
         ChangeNicknameDialog(
-            onDismiss = { showChangeNicknameDialog.value = false },
+            onDismiss = {
+                showChangeNicknameDialog.value = false
+                showFloatingMessage.value = true
+            },
             onConfirm = { newNickname ->
                 showChangeNicknameDialog.value = false
                 settingsViewModel.changeNickname(newNickname)
+                showFloatingMessage.value = true
             }
         )
     }
-}}
-
+}
 
 @Composable
 fun ChangeNicknameDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     val nickname = remember { mutableStateOf("") }
     AlertDialog(
@@ -191,9 +216,9 @@ fun ChangeNicknameDialog(
         containerColor = Color(0xFF2F2F36),
         titleContentColor = Color.White,
         textContentColor = Color.White
-
     )
 }
+
 @Composable
 fun SettingSection(title: String, options: List<SettingOption>) {
     Column {

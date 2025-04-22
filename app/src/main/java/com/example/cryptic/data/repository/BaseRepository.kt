@@ -61,5 +61,9 @@ class ProfileRepository(
         val response = apiService.uploadAvatar(file)
         return response.isSuccessful
     }
-
+    suspend fun searchUsers(query: String): Result<List<PublicProfile>> {
+        return safeApiCall {
+            apiService.searchUsers(query)
+        }
+    }
 }

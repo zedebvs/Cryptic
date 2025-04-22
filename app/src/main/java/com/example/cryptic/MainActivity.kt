@@ -21,10 +21,12 @@ import com.example.cryptic.di.LocalTokenManager
 import com.example.cryptic.di.LocalRegistrationRepository
 import com.example.cryptic.di.LocalMainViewModel
 import com.example.cryptic.di.LocalProfileViewModel
+import com.example.cryptic.di.LocalSearchViewModel
 import com.example.cryptic.di.LocalSettingsViewModel
 import com.example.cryptic.presentation.login.LoginScreen
 import com.example.cryptic.presentation.main.MainViewModel
 import com.example.cryptic.presentation.main.ProfileViewModel
+import com.example.cryptic.presentation.main.SearchViewModel
 import com.example.cryptic.presentation.main.SettingsViewModel
 import com.example.cryptic.presentation.navigator.AppNavGraph
 
@@ -37,6 +39,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+
         val tokenManager = TokenManager(this)
         val apiService = RetrofitClient.getApiServiceWithRefresh(tokenManager)
         val authRepository = AuthRepository(apiService, tokenManager)
@@ -44,6 +49,7 @@ class MainActivity : ComponentActivity() {
         val profileRepository = ProfileRepository(apiService)
         val profileViewModel = ProfileViewModel(profileRepository, authRepository)
         val socketRepository = SocketRepository(tokenManager, apiService)
+        val searchViewModel = SearchViewModel(profileRepository)
 
         val settingsViewModel = SettingsViewModel(socketRepository)
         //settingsViewModel.connect()
@@ -55,7 +61,8 @@ class MainActivity : ComponentActivity() {
                 LocalAuthRepository provides authRepository,
                 LocalTokenManager provides tokenManager,
                 LocalProfileViewModel provides profileViewModel,
-                LocalSettingsViewModel provides settingsViewModel
+                LocalSettingsViewModel provides settingsViewModel,
+                LocalSearchViewModel provides searchViewModel
             ) {
                 val navController = rememberNavController()
                 AppNavGraph(navController = navController)
@@ -64,6 +71,6 @@ class MainActivity : ComponentActivity() {
     }
     override fun onDestroy() {
         super.onDestroy()
-        settingsViewModel.close()  // вот тут закрываем сокет
+        settingsViewModel.close()
     }
 }
