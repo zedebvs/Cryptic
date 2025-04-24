@@ -42,7 +42,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.foundation.lazy.items
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
+import androidx.compose.runtime.DisposableEffect
 
 @Composable
 fun UserSearchScreen(navController: NavHostController) {
@@ -50,6 +52,11 @@ fun UserSearchScreen(navController: NavHostController) {
     val searchViewModel = LocalSearchViewModel.current
     val searchResults by searchViewModel.searchResults.collectAsState()
 
+    DisposableEffect(Unit) {
+        onDispose {
+            searchViewModel.resetState()
+        }
+    }
     GradientBackgroundHome {
         Column(
             modifier = Modifier
@@ -151,7 +158,7 @@ fun UserSearchItem(
             Text(text = user.name, color = Color.White, fontSize = 18.sp)
             Text(
                 text = if (user.online > 0) "В сети"
-                else formatLastonline(user.lastOnline),
+                else formatLastonline(user.lastonline),
                 color = if (user.online > 0) Color(0xFF4CAF50) else Color.Gray,
                 fontSize = 14.sp
             )
@@ -170,9 +177,20 @@ fun formatLastonline(lastonline: String?): String {
     if (lastonline.isNullOrEmpty()) return "Нет данных"
 
     return try {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
         val dateTime = LocalDateTime.parse(lastonline, formatter)
-        "Был в сети в ${dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))}"
+
+        val now = LocalDateTime.now()
+        val today = now.toLocalDate()
+        val date = dateTime.toLocalDate()
+        val daysAgo = ChronoUnit.DAYS.between(date, today)
+
+        when (daysAgo) {
+            0L -> "Был в сети в ${dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))}"
+            1L -> "Был в сети вчера в ${dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))}"
+            2L -> "Был в сети позавчера в ${dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))}"
+            else -> "Был в сети ${dateTime.format(DateTimeFormatter.ofPattern("dd MMMM yyyy 'в' HH:mm", Locale("ru")))}"
+        }
     } catch (e: Exception) {
         "Нет данных"
     }

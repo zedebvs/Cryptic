@@ -1,5 +1,6 @@
 package com.example.cryptic
 
+import ChatRepository
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -50,13 +51,14 @@ class MainActivity : ComponentActivity() {
         val profileViewModel = ProfileViewModel(profileRepository, authRepository)
         val socketRepository = SocketRepository(tokenManager, apiService)
         val searchViewModel = SearchViewModel(profileRepository)
+        val chatRepository = ChatRepository(tokenManager, apiService)
 
         val settingsViewModel = SettingsViewModel(socketRepository)
         //settingsViewModel.connect()
 
         setContent {
             CompositionLocalProvider(
-                LocalMainViewModel provides MainViewModel(profileRepository, authRepository),
+                LocalMainViewModel provides MainViewModel(profileRepository, authRepository, chatRepository),
                 LocalRegistrationRepository provides registerRepository,
                 LocalAuthRepository provides authRepository,
                 LocalTokenManager provides tokenManager,

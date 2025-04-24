@@ -28,4 +28,7 @@ class SearchViewModel(
     fun clearSearchResults() {
         _searchResults.value = emptyList()
     }
+    fun resetState() {
+        _searchResults.value = emptyList()
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.cryptic.data.api.models
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
 data class LoginResponse(
@@ -19,7 +20,7 @@ data class PublicProfile(
     val avatar: String,
     val status: String?,
     val online: Int,
-    val lastOnline: String?
+    val lastonline: String
 )
 
 data class PrivateProfile(
@@ -37,9 +38,18 @@ data class RefreshResponse(val accessToken: String)
 data class UpdateStatus(val status: String) // отправляем
 data class NewStatus(val status: String)    // получаем
 
-data class UserData(
+@Serializable
+data class ChatItem(
     val id: String,
+    val text: String,
+    val timestamp: String,
+    val status: String,
+    val sender_id: Int,
+    val recipient_id: Int,
+    val profile_id: Int,
     val name: String,
-    val avatarUrl: String,
-    val isOnline: Boolean
+    val avatar: String,
+    val profile_status: String?,
+    val online: Int,
+    val lastonline: String
 )

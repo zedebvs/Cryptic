@@ -17,7 +17,7 @@ class TokenRefreshInterceptor(
 
         if (response.code == 401) {
             synchronized(this) {
-                response.close() // закрываем старый response
+                response.close()
 
                 val refreshToken = tokenManager.getRefreshToken()
                 if (refreshToken != null) {
@@ -37,11 +37,11 @@ class TokenRefreshInterceptor(
 
                             return chain.proceed(newRequest)
                         } else {
-                            // если refresh прошел, но token не пришёл
+
                             tokenManager.clearTokens()
                         }
                     } else {
-                        // refresh не успешен
+
                         tokenManager.clearTokens()
                     }
                 }

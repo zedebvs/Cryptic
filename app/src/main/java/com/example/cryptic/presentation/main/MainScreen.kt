@@ -59,22 +59,31 @@ import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.getValue
 import coil.compose.AsyncImage
+import com.example.cryptic.data.api.models.ChatItem
 import com.example.cryptic.di.LocalMainViewModel
 import com.example.cryptic.di.LocalSettingsViewModel
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.Locale
+import kotlin.time.Duration
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val mainViewModel = LocalMainViewModel.current
     val profile by mainViewModel.profile.collectAsState()
+    val chats by mainViewModel.chats.collectAsState()
     val settingsViewModel = LocalSettingsViewModel.current
 
     var showMenu = remember { mutableStateOf(false) }
     val imageUrl = profile?.avatar
-    LaunchedEffect(Unit) {
-        mainViewModel.fetchProfile()
-    }
+
     LaunchedEffect(Unit) {
         settingsViewModel.connect()
+    }
+    LaunchedEffect(Unit) {
+        mainViewModel.fetchProfile()
+        mainViewModel.requestChats()
     }
     GradientBackgroundHome() {
         Column(
@@ -132,45 +141,23 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 }
             }
-            val chats = remember {
-                listOf(
-                    ChatItemData(
-                        R.drawable.test_image2, "Test_name",
-                        "Привет! Как у тебя дела? Давно не виделись, не хочешь встретиться?",
-                        "3:59", true, true, true
-                    ),
-                    ChatItemData(
-                        R.drawable.test_image, "Миша",
-                        "Ща подойду!", "4:02", false, false, false
-                    ),
-                    ChatItemData(
-                        R.drawable.test_image2, "Test_name",
-                        "Привет! Как у тебя дела? Давно не виделись, не хочешь встретиться?",
-                        "3:59", true, true, false
-                    ),
-                    ChatItemData(
-                        R.drawable.test_image, "Миша",
-                        "Ща подойду!", "4:02", true, false, true
-                    ),
-                    ChatItemData(
-                        R.drawable.test_image, "Миша",
-                        "Ща подойду!", "4:02", false, false, true
-                    )
 
-                )
-            }
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF202126))
-            ) {
+            LazyColumn {
                 items(chats) { chat ->
-                    ChatItem(item = chat, onClick = {
-                        navController.navigate("chat_screen")
-                    })
-                }
-            }
+                    ChatItem(
+                        item = ChatItemData(
+                            avatarRes = chat.avatar,
+                            nickName = chat.name,
+                            lastMessage = chat.text,
+                            time = formatTime(chat.timestamp),
+                            isMineLastMessage = chat.sender_id == profile?.id,
+                            isLastMessageRead = chat.status == "read" && chat.sender_id == profile?.id,
+                            isUnread = chat.status == "delivered" && chat.sender_id != profile?.id,
+                            isOnline = chat.online
+                        ),
+                        onClick = { /* обработка клика */ }
+                    )
+                }}
         }
         if (showMenu.value) {
             Box(
@@ -362,19 +349,31 @@ fun ChatItem(item: ChatItemData, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (item.isUnread) Color(0xFF2F2F36) else Color(0xFF202126))
+            .background(if (item.isUnread) Color(0xFF18181D) else Color(0xFF16161A))
             .clickable { onClick() }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Image(
-            painter = painterResource(id = item.avatarRes),
-            contentDescription = "Avatar",
-            modifier = Modifier
-                .size(54.dp)
-                .clip(CircleShape)
-        )
+        Box {
+            AsyncImage(
+                model = item.avatarRes,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(CircleShape)
+            )
+
+            if (item.isOnline > 0) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(Color(0xFF4CAF50), shape = CircleShape)
+                        .align(Alignment.BottomEnd)
+                        .border(1.dp, Color.Black, CircleShape)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -435,5 +434,25 @@ fun ChatItem(item: ChatItemData, onClick: () -> Unit) {
                 }
             }
         }
+    }
+
+}
+private fun formatTime(timestamp: String): String {
+    return try {
+        val formatter = DateTimeFormatter.ISO_DATE_TIME
+        val time = LocalDateTime.parse(timestamp, formatter)
+        val now = LocalDateTime.now()
+
+        val days = ChronoUnit.DAYS.between(time.toLocalDate(), now.toLocalDate())
+
+        when {
+            days < 1 -> "${time.hour}:${time.minute.toString().padStart(2, '0')}"
+            days == 1L -> "вчера"
+            days == 2L -> "позавчера"
+            days < 7L -> "$days дня назад"
+            else -> time.format(DateTimeFormatter.ofPattern("dd MMM", Locale("ru")))
+        }
+    } catch (e: Exception) {
+        timestamp
     }
 }
