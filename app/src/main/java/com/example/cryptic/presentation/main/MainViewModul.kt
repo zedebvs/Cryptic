@@ -3,10 +3,12 @@ package com.example.cryptic.presentation.main
 import ChatRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cryptic.Network.WebSocketClient
 import com.example.cryptic.data.api.models.ChatItem
 import com.example.cryptic.data.api.models.PublicProfile
 import com.example.cryptic.data.repository.AuthRepository
 import com.example.cryptic.data.repository.ProfileRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -41,7 +43,14 @@ class MainViewModel(
             }
         }
     }
-
+    fun requestChatsWhenReady() {
+        viewModelScope.launch {
+            while (!WebSocketClient.isReady()) {
+                delay(100)
+            }
+            chatRepository.requestChats()
+        }
+    }
     init {
         viewModelScope.launch {
             chatRepository.chats.collect {

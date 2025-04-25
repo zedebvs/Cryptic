@@ -83,7 +83,7 @@ fun HomeScreen(navController: NavHostController) {
     }
     LaunchedEffect(Unit) {
         mainViewModel.fetchProfile()
-        mainViewModel.requestChats()
+        mainViewModel.requestChatsWhenReady()
     }
     GradientBackgroundHome() {
         Column(
@@ -349,7 +349,7 @@ fun ChatItem(item: ChatItemData, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (item.isUnread) Color(0xFF18181D) else Color(0xFF16161A))
+            .background(if (item.isUnread) Color(0xFF22222A) else Color(0xFF16161A))
             .clickable { onClick() }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically

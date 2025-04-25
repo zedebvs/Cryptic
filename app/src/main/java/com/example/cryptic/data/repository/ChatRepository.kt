@@ -48,7 +48,7 @@ class ChatRepository(
                 "chats" -> {
                     if (data != null && data !is JsonNull) {
                         val chats = Json.decodeFromJsonElement<List<ChatItem>>(data)
-                        _chats.value = chats
+                        _chats.value = chats.sortedByDescending { it.timestamp }
                     }
                 }
 
@@ -56,6 +56,13 @@ class ChatRepository(
                     if (data != null && data !is JsonNull) {
                         val chatItem = Json.decodeFromJsonElement<ChatItem>(data)
                         updateChats(chatItem)
+                    }
+                }
+
+                "updateChat" -> {
+                    if (data != null && data !is JsonNull) {
+                        val updatedChatItem = Json.decodeFromJsonElement<ChatItem>(data)
+                        updateChats(updatedChatItem)
                     }
                 }
 
@@ -80,7 +87,7 @@ class ChatRepository(
         currentChats.removeAll { it.profile_id == newChatItem.profile_id }
         currentChats.add(0, newChatItem)
 
-        _chats.value = currentChats
+        _chats.value = currentChats.sortedByDescending { it.timestamp }
     }
 
 }

@@ -54,7 +54,7 @@ fun FloatingMessage(message: String?) {
             ) {
                 Text(
                     text = message,
-                    color = if (message.startsWith("Ошибка")) Color.Red else Color(0xFF3DDC84),
+                    color = if (message.startsWith("Ошибка:")) Color.Red else Color(0xFF3DDC84),
                     fontSize = 16.sp,
                     modifier = Modifier
                         .padding(16.dp)
@@ -259,9 +259,9 @@ fun SettingItem(option: SettingOption) {
     }
 }
 
-@Composable
-@Preview(showBackground = true)
-fun SettingsScreenPreview() {
-    val navController = rememberNavController()
-    SettingsScreen(navController)
-}
+//@Composable
+//@Preview(showBackground = true)
+//fun SettingsScreenPreview() {
+//    val navController = rememberNavController()
+//    SettingsScreen(navController)
+//}

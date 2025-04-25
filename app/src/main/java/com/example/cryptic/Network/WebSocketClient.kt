@@ -30,6 +30,8 @@ object WebSocketClient {
         onMessageReceived = listener
     }
 
+    fun isReady(): Boolean = isConnected
+
     fun connect() {
         if (isConnected) {
             Log.d("WebSocket", "Already connected")
