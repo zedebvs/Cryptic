@@ -5,8 +5,10 @@ import com.example.cryptic.data.repository.AuthRepository
 import com.example.cryptic.data.repository.RegisterRepository
 import com.example.cryptic.data.local.TokenManager
 import com.example.cryptic.data.repository.SocketRepository
+import com.example.cryptic.presentation.main.ChatViewModel
 import com.example.cryptic.presentation.main.MainViewModel
 import com.example.cryptic.presentation.main.ProfileViewModel
+import com.example.cryptic.presentation.main.PublicProfileViewModel
 import com.example.cryptic.presentation.main.SearchViewModel
 import com.example.cryptic.presentation.main.SettingsViewModel
 
@@ -36,4 +38,12 @@ val LocalSettingsViewModel = staticCompositionLocalOf<SettingsViewModel> {
 
 val LocalSearchViewModel = staticCompositionLocalOf<SearchViewModel> {
     error("No SocketRepository provided")
+}
+
+val LocalPublicProfileViewModel = staticCompositionLocalOf<PublicProfileViewModel> {
+    error("No PublicProfileViewModel provided")
+}
+
+val LocalChatViewModel = staticCompositionLocalOf<ChatViewModel> {
+    error("No ChatViewModel provided")
 }

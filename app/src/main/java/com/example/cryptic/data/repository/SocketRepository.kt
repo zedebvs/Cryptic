@@ -20,8 +20,10 @@ class SocketRepository(
 
     init {
         WebSocketClient.init(tokenManager, apiService)
-        WebSocketClient.setOnMessageReceivedListener { message ->
-            _incomingMessages.value = message
+        WebSocketClient.setOnRawMessageReceivedListener { rawMessage ->
+            if (!rawMessage.trim().startsWith("{")) {
+                _incomingMessages.value = rawMessage
+            }
         }
 
         tokenManager.tokenUpdatedEvent
@@ -31,7 +33,9 @@ class SocketRepository(
             }
             .launchIn(CoroutineScope(Dispatchers.IO))
     }
-
+    fun clearIncomingMessage() {
+        _incomingMessages.value = null
+    }
     fun connect() = WebSocketClient.connect()
     fun send(message: String) = WebSocketClient.send(message)
     fun close() = WebSocketClient.close()

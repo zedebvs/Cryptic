@@ -21,3 +21,14 @@ fun GradientBackgroundHome(content: @Composable BoxScope.() -> Unit) {
         content()
     }
 }
+@Composable
+fun GradientBackgroundChat(content: @Composable BoxScope.() -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF202126))
+    )
+    {
+        content()
+    }
+}

@@ -3,6 +3,8 @@ package com.example.cryptic.presentation.main
 import android.util.Log
 import androidx.compose.animation.EnterTransition.Companion.None
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,11 +42,17 @@ import com.example.cryptic.data.api.models.PublicProfile
 import com.example.cryptic.di.LocalSearchViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun UserSearchScreen(navController: NavHostController) {
@@ -57,30 +65,20 @@ fun UserSearchScreen(navController: NavHostController) {
             searchViewModel.resetState()
         }
     }
+
     GradientBackgroundHome {
         Column(
             modifier = Modifier
                 .systemBarsPadding()
                 .fillMaxSize()
-                .background(Color(0xFF202126))
-                .padding(16.dp)
+                .background(Color(0xFF1E1E24))
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF2F2F36), shape = CircleShape)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                    tint = Color.Gray,
-                    modifier = Modifier.size(24.dp)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
                 TextField(
                     value = searchQuery.value,
                     onValueChange = {
@@ -91,33 +89,50 @@ fun UserSearchScreen(navController: NavHostController) {
                             searchViewModel.clearSearchResults()
                         }
                     },
-                    placeholder = { Text("Введите имя пользователя", color = Color.Gray) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            tint = Color(0xFFA0A0A0))
+                    },
+                    placeholder = {
+                        Text(
+                            "Найти пользователя...",
+                            color = Color(0xFFA0A0A0)
+                        )
+                    },
                     singleLine = true,
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.Transparent),
+                        .height(56.dp),
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                         disabledTextColor = Color.White,
-                        cursorColor = Color.White,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent
-                    )
+                        cursorColor = Color(0xFF6C5CE7),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedContainerColor = Color(0xFF2A2A32),
+                        unfocusedContainerColor = Color(0xFF2A2A32),
+                    ),
+                    shape = RoundedCornerShape(16.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
             ) {
                 items(searchResults) { user ->
                     UserSearchItem(
                         user = user,
                         onViewProfile = { if (user.id != null) {
-                            navController.navigate("profile/${user.id}")
-                        } },
+                            navController.navigate("public_profile/${user.id}")
+                        }},
                         onSendMessage = { if (user.id != null) {
                             navController.navigate("chat/${user.id}")
                         } }
@@ -135,44 +150,99 @@ fun UserSearchItem(
     onViewProfile: () -> Unit,
     onSendMessage: () -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF2F2F36), shape = CircleShape)
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AsyncImage(
-            model = user.avatar,
-            contentDescription = "Avatar",
-            modifier = Modifier
-                .size(54.dp)
-                .clip(CircleShape)
+            .height(80.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF2A2A32)
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
         )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(
-            modifier = Modifier.weight(1f)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = user.name, color = Color.White, fontSize = 18.sp)
-            Text(
-                text = if (user.online > 0) "В сети"
-                else formatLastonline(user.lastonline),
-                color = if (user.online > 0) Color(0xFF4CAF50) else Color.Gray,
-                fontSize = 14.sp
-            )
-        }
+            Box(
+                modifier = Modifier
+                    .size(58.dp)) {
+                        AsyncImage(
+                            model = user.avatar,
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
 
-        IconButton(onClick = onViewProfile) {
-            Icon(Icons.Default.AccountCircle, contentDescription = "Профиль", tint = Color.Gray)
-        }
+                        // Индикатор онлайн статуса
+                        if (user.online > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF4CAF50))
+                                    .border(2.dp, Color(0xFF2A2A32), CircleShape)
+                            )
+                        }
+                    }
 
-        IconButton(onClick = onSendMessage) {
-            Icon(Icons.Default.Done, contentDescription = "Написать", tint = Color.Gray)
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(
+                        modifier = Modifier.weight(1f))
+                        {
+                            Text(
+                                text = user.name,
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = if (user.online > 0) "В сети"
+                                else formatLastonline(user.lastonline),
+                                color = if (user.online > 0) Color(0xFF4CAF50) else Color(0xFFA0A0A0),
+                                fontSize = 12.sp
+                            )
+                        }
+
+                                Row {
+                            IconButton(
+                                onClick = onViewProfile,
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.AccountCircle,
+                                    contentDescription = "Профиль",
+                                    tint = Color(0xFF6C5CE7),
+                                    modifier = Modifier.size(34.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            IconButton(
+                                onClick = onSendMessage,
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Message,
+                                    contentDescription = "Написать",
+                                    tint = Color(0xFF6C5CE7),
+                                    modifier = Modifier.size(34.dp)
+                                )
+                            }
+                        }
         }
     }
 }
+
 fun formatLastonline(lastonline: String?): String {
     if (lastonline.isNullOrEmpty()) return "Нет данных"
 

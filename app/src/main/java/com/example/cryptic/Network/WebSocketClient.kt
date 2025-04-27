@@ -17,6 +17,7 @@ object WebSocketClient {
     private var isConnected = false
 
     private var onMessageReceived: ((String) -> Unit)? = null
+    private var onRawMessageReceived: ((String) -> Unit)? = null
 
     private lateinit var apiService: ApiService
 
@@ -30,6 +31,9 @@ object WebSocketClient {
         onMessageReceived = listener
     }
 
+    fun setOnRawMessageReceivedListener(listener: (String) -> Unit) {
+        onRawMessageReceived = listener
+    }
     fun isReady(): Boolean = isConnected
 
     fun connect() {
@@ -68,6 +72,7 @@ object WebSocketClient {
         override fun onMessage(webSocket: WebSocket, text: String) {
             Log.d("WebSocket", "Message: $text")
             onMessageReceived?.invoke(text)
+            onRawMessageReceived?.invoke(text)
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {

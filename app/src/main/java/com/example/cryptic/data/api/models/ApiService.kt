@@ -19,6 +19,7 @@ import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -50,5 +51,10 @@ interface ApiService {
     suspend fun searchUsers(
         @Query("query") query: String
     ): Response<List<PublicProfile>>
+
+    @GET("/profiles/user_profile/{userId}")
+    suspend fun getUserProfile(
+        @Path("userId") userId: Int
+    ): Response<PublicProfile>
 }
 

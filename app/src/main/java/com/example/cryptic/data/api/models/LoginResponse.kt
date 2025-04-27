@@ -53,3 +53,27 @@ data class ChatItem(
     val online: Int,
     val lastonline: String
 )
+
+@Serializable
+data class MessageItem(
+    val id: String,
+    val sender_id: Int,
+    val recipient_id: Int,
+    val text: String,
+    val timestamp: String,
+    val status: String,
+    val is_edited: Boolean,
+    val reaction: String? = null,
+    val message_type: String = "text",
+    val attachment_url: String? = null
+)
+@Serializable
+data class ProfileUser(
+    val profile_id: Int,
+    val name: String,
+    val avatar: String,
+    val profile_status: String?,
+    val online: Int,
+    val lastonline: String
+)
+

@@ -72,10 +72,12 @@ fun SettingsScreen(navController: NavHostController) {
     val message = settingsViewModel.incomingMessages.collectAsState()
     val showFloatingMessage = remember { mutableStateOf(false) }
 
-    if (showFloatingMessage.value) {
-        LaunchedEffect(showFloatingMessage.value) {
-            delay(2000)
-            showFloatingMessage.value = false
+    if (showFloatingMessage.value && !message.value.isNullOrEmpty()) {
+        FloatingMessage(message.value)
+
+        LaunchedEffect(message.value) {
+            delay(3000)
+            settingsViewModel.clearIncomingMessage()
         }
     }
 

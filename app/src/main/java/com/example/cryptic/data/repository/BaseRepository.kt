@@ -66,4 +66,9 @@ class ProfileRepository(
             apiService.searchUsers(query)
         }
     }
+    suspend fun getUserProfile(userId: Int): Result<PublicProfile> {
+        return safeApiCall {
+            apiService.getUserProfile(userId)
+        }
+    }
 }

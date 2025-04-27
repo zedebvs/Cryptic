@@ -18,15 +18,19 @@ import com.example.cryptic.data.repository.ProfileRepository
 import com.example.cryptic.data.repository.RegisterRepository
 import com.example.cryptic.data.repository.SocketRepository
 import com.example.cryptic.di.LocalAuthRepository
+import com.example.cryptic.di.LocalChatViewModel
 import com.example.cryptic.di.LocalTokenManager
 import com.example.cryptic.di.LocalRegistrationRepository
 import com.example.cryptic.di.LocalMainViewModel
 import com.example.cryptic.di.LocalProfileViewModel
+import com.example.cryptic.di.LocalPublicProfileViewModel
 import com.example.cryptic.di.LocalSearchViewModel
 import com.example.cryptic.di.LocalSettingsViewModel
 import com.example.cryptic.presentation.login.LoginScreen
+import com.example.cryptic.presentation.main.ChatViewModel
 import com.example.cryptic.presentation.main.MainViewModel
 import com.example.cryptic.presentation.main.ProfileViewModel
+import com.example.cryptic.presentation.main.PublicProfileViewModel
 import com.example.cryptic.presentation.main.SearchViewModel
 import com.example.cryptic.presentation.main.SettingsViewModel
 import com.example.cryptic.presentation.navigator.AppNavGraph
@@ -52,6 +56,8 @@ class MainActivity : ComponentActivity() {
         val socketRepository = SocketRepository(tokenManager, apiService)
         val searchViewModel = SearchViewModel(profileRepository)
         val chatRepository = ChatRepository(tokenManager, apiService)
+        val publicProfileViewModel = PublicProfileViewModel(profileRepository)
+        val chatViewModel = ChatViewModel(chatRepository)
 
         val settingsViewModel = SettingsViewModel(socketRepository)
         //settingsViewModel.connect()
@@ -64,7 +70,9 @@ class MainActivity : ComponentActivity() {
                 LocalTokenManager provides tokenManager,
                 LocalProfileViewModel provides profileViewModel,
                 LocalSettingsViewModel provides settingsViewModel,
-                LocalSearchViewModel provides searchViewModel
+                LocalSearchViewModel provides searchViewModel,
+                LocalPublicProfileViewModel provides publicProfileViewModel,
+                LocalChatViewModel provides chatViewModel
             ) {
                 val navController = rememberNavController()
                 AppNavGraph(navController = navController)

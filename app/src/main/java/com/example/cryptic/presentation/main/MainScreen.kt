@@ -155,7 +155,9 @@ fun HomeScreen(navController: NavHostController) {
                             isUnread = chat.status == "delivered" && chat.sender_id != profile?.id,
                             isOnline = chat.online
                         ),
-                        onClick = { /* обработка клика */ }
+                        onClick = {
+                            navController.navigate("chat/${chat.profile_id}")
+                        }
                     )
                 }}
         }

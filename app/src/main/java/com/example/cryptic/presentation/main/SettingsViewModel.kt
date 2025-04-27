@@ -24,6 +24,10 @@ class SettingsViewModel(
         }
     }
 
+    fun clearIncomingMessage() {
+        socketRepository.clearIncomingMessage()
+    }
+
     fun connect() {
         socketRepository.connect()
     }
