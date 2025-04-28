@@ -62,10 +62,35 @@ fun ChatScreen(recipientId: Int) {
             }
         }
     }
+    val firstUnreadIndex = messages.indexOfFirst { it.status != "read" && it.sender_id == profile?.profile_id }
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            coroutineScope.launch {
+                if (firstUnreadIndex != -1) {
+                    listState.scrollToItem(firstUnreadIndex)
+                } else {
+                    listState.scrollToItem(messages.size - 1)
+                }
+            }
+        }
+    }
     LaunchedEffect(recipientId) {
         chatViewModel.requestMessages(recipientId)
     }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo }
+            .collect { visibleItems ->
+                val visibleMessageIds = visibleItems.map { messages[it.index].id }
 
+                visibleMessageIds.forEach { messageId ->
+                    val message = messages.find { it.id == messageId }
+                    if (message != null && message.status != "read" && message.sender_id == profile?.profile_id) {
+                        chatViewModel.markMessageAsRead(messageId)
+                    }
+                }
+            }
+    }
 
     val systemUiController = rememberSystemUiController()
     LaunchedEffect(Unit) {
@@ -150,7 +175,6 @@ fun ChatHeader(
                 .padding(vertical = 12.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Аватар
             Box(modifier = Modifier.size(50.dp)) {
                 AsyncImage(
                     model = avatarUrl,
@@ -160,7 +184,6 @@ fun ChatHeader(
                         .clip(CircleShape)
                 )
 
-                // Индикатор онлайн статуса
                 if (status == "online") {
                     Box(
                         modifier = Modifier
@@ -175,7 +198,6 @@ fun ChatHeader(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Имя и статус
             Column {
                 Text(
                     text = name,
@@ -192,8 +214,7 @@ fun ChatHeader(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Дополнительные кнопки
-            IconButton(onClick = { /* Действия */ }) {
+            IconButton(onClick = {  }) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = "More",

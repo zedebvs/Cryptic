@@ -71,20 +71,27 @@ class ChatRepository(
                         val updatedMessages = _messages.value.toMutableList().apply { add(newMessage) }
                         _messages.value = updatedMessages
 
-                        // Уведомляем ViewModel
                         _currentChatProfile.value?.let { profile ->
                             onMessagesReceivedListener?.invoke(updatedMessages, profile)
                         }
                     }
                 }
+                "message_read" -> {
+                    if (data != null) {
+                        val updatedMessages = Json.decodeFromJsonElement<List<MessageItem>>(data)
+                        _messages.value = updatedMessages
 
+                        _currentChatProfile.value?.let { profile ->
+                            onMessagesReceivedListener?.invoke(updatedMessages, profile)
+                        }
+                    }
+                }
                 "new_message" -> {
                     if (data != null && data !is JsonNull) {
                         val newMessage = Json.decodeFromJsonElement<MessageItem>(data)
                         val updatedMessages = _messages.value.toMutableList().apply { add(newMessage) }
                         _messages.value = updatedMessages
 
-                        // Уведомляем ViewModel о новом сообщении
                         _currentChatProfile.value?.let { profile ->
                             onMessagesReceivedListener?.invoke(updatedMessages, profile)
                         }
@@ -124,6 +131,10 @@ class ChatRepository(
     }
     fun sendMessage(recipientId: Int, messageText: String) {
         val request = """{ "action": "sendMessage", "recipient_id": $recipientId, "message": "$messageText" }"""
+        WebSocketClient.send(request)
+    }
+    fun markMessageAsRead(id: String) {
+        val request = """{ "action": "mark_as_read", "message_id": "$id" }"""
         WebSocketClient.send(request)
     }
     fun requestMessages(recipientId: Int) {

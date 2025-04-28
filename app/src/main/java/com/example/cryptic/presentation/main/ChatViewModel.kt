@@ -30,7 +30,9 @@ class ChatViewModel(
             }
         }
     }
-
+    fun markMessageAsRead(messageId: String) {
+        chatRepository.markMessageAsRead(messageId)
+    }
     fun sendMessage(recipientId: Int, messageText: String) {
         chatRepository.sendMessage(recipientId, messageText)
     }

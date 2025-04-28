@@ -3,11 +3,17 @@ package com.example.cryptic.Network
 import android.util.Log
 import com.example.cryptic.data.api.ApiService
 import com.example.cryptic.data.local.TokenManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+
 
 object WebSocketClient {
     private var webSocket: WebSocket? = null
@@ -21,6 +27,21 @@ object WebSocketClient {
 
     private lateinit var apiService: ApiService
 
+    private var pingJob: Job? = null//
+
+    private fun startPinging() {
+        pingJob = CoroutineScope(Dispatchers.IO).launch {
+            while (isConnected) {
+                delay(30_000) // каждые 30 секунд
+                send("""{"action": "ping"}""")
+            }
+        }
+    }
+
+    private fun stopPinging() {
+        pingJob?.cancel()
+        pingJob = null
+    }
     fun init(tokenManager: TokenManager, api: ApiService) {
         this.tokenManager = tokenManager
         this.apiService = api
@@ -61,12 +82,16 @@ object WebSocketClient {
     fun close() {
         webSocket?.close(1000, "Client closed connection")
         isConnected = false
+
+        stopPinging()
     }
 
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             Log.d("WebSocket", "Connected")
             isConnected = true
+
+            startPinging()
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
