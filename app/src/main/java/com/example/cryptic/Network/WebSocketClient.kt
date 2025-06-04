@@ -67,9 +67,8 @@ object WebSocketClient {
             Log.e("WebSocket", "No token found")
             return
         }
-
         val request = Request.Builder()
-            .url("ws://192.168.0.200:8000/ws/chat?token=$accessToken")
+            .url("wss://192.168.0.222/ws/chat?token=$accessToken")
             .build()
 
         webSocket = client.newWebSocket(request, socketListener)
@@ -121,7 +120,7 @@ object WebSocketClient {
         val newToken = tokenManager.refreshTokenBlocking(apiService)
 
         val request = Request.Builder()
-            .url("ws://192.168.0.200:8000/ws/chat?token=$newToken")
+            .url("wss://192.168.0.222/ws/chat?token=$newToken")
             .build()
 
         webSocket = client.newWebSocket(request, socketListener)

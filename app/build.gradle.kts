@@ -64,11 +64,11 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.3")
-
+    implementation("org.bouncycastle:bcprov-jdk15to18:1.77")
     implementation("androidx.compose.material:material-icons-extended:1.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
-
+    implementation("com.google.crypto.tink:tink-android:1.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("io.ktor:ktor-client-core:2.3.7")
     implementation("io.ktor:ktor-client-cio:2.3.7")

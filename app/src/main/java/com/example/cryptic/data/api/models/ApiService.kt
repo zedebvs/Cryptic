@@ -1,9 +1,11 @@
 package com.example.cryptic.data.api
 
+import com.example.cryptic.data.api.models.AesChipherKey
 import com.example.cryptic.data.api.models.LoginResponse
 import com.example.cryptic.data.api.models.LoginRequest
 import com.example.cryptic.data.api.models.NewStatus
 import com.example.cryptic.data.api.models.PrivateProfile
+import com.example.cryptic.data.api.models.PublicKey
 import com.example.cryptic.data.api.models.PublicProfile
 import com.example.cryptic.data.api.models.RefreshRequest
 import com.example.cryptic.data.api.models.RefreshResponse
@@ -40,6 +42,9 @@ interface ApiService {
 
     @POST("/profiles/Status")
     suspend fun updateStatus(@Body status: UpdateStatus): Response<NewStatus>
+
+    @POST("/profiles/Public_key")
+    suspend fun getMyKey(@Body key: PublicKey): Response<AesChipherKey>
 
     @Multipart
     @POST("/profiles/uploadAvatar")

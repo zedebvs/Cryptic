@@ -78,7 +78,10 @@ class ChatRepository(
                 }
                 "message_read" -> {
                     if (data != null) {
-                        val updatedMessages = Json.decodeFromJsonElement<List<MessageItem>>(data)
+                        val updatedMessage = Json.decodeFromJsonElement<MessageItem>(data)
+                        val updatedMessages = _messages.value.map {
+                            if (it.id == updatedMessage.id) updatedMessage else it
+                        }
                         _messages.value = updatedMessages
 
                         _currentChatProfile.value?.let { profile ->

@@ -1,6 +1,7 @@
 package com.example.cryptic
 
 import ChatRepository
+import android.app.Application
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -12,6 +13,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.Network.RetrofitClient
+import com.example.cryptic.Network.WebSocketClient
+import com.example.cryptic.data.Crypto.UserKeyStore
 import com.example.cryptic.data.local.TokenManager
 import com.example.cryptic.data.repository.AuthRepository
 import com.example.cryptic.data.repository.ProfileRepository
@@ -26,6 +29,7 @@ import com.example.cryptic.di.LocalProfileViewModel
 import com.example.cryptic.di.LocalPublicProfileViewModel
 import com.example.cryptic.di.LocalSearchViewModel
 import com.example.cryptic.di.LocalSettingsViewModel
+import com.example.cryptic.di.LocalUserKeyStore
 import com.example.cryptic.presentation.login.LoginScreen
 import com.example.cryptic.presentation.main.ChatViewModel
 import com.example.cryptic.presentation.main.MainViewModel
@@ -48,8 +52,9 @@ class MainActivity : ComponentActivity() {
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
         val tokenManager = TokenManager(this)
+        val userKeyStore = UserKeyStore(this)
         val apiService = RetrofitClient.getApiServiceWithRefresh(tokenManager)
-        val authRepository = AuthRepository(apiService, tokenManager)
+        val authRepository = AuthRepository(apiService, tokenManager, userKeyStore)
         val registerRepository = RegisterRepository(apiService)
         val profileRepository = ProfileRepository(apiService)
         val profileViewModel = ProfileViewModel(profileRepository, authRepository)
@@ -72,7 +77,8 @@ class MainActivity : ComponentActivity() {
                 LocalSettingsViewModel provides settingsViewModel,
                 LocalSearchViewModel provides searchViewModel,
                 LocalPublicProfileViewModel provides publicProfileViewModel,
-                LocalChatViewModel provides chatViewModel
+                LocalChatViewModel provides chatViewModel,
+                LocalUserKeyStore provides userKeyStore
             ) {
                 val navController = rememberNavController()
                 AppNavGraph(navController = navController)

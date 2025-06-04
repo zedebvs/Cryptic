@@ -4,6 +4,7 @@ import com.example.cryptic.Network.RetrofitClient
 import com.example.cryptic.data.api.ApiService
 import com.example.cryptic.data.api.models.LoginResponse
 import com.example.cryptic.data.api.models.LoginRequest
+import com.example.cryptic.data.api.models.PublicKey
 import com.example.cryptic.data.api.models.PublicProfile
 import com.example.cryptic.data.api.models.RegistrationRequest
 import com.example.cryptic.data.local.TokenManager
@@ -15,10 +16,13 @@ import org.json.JSONObject
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
+import android.util.Base64
+import com.example.cryptic.data.Crypto.UserKeyStore
 
 class AuthRepository(
     private val apiService: ApiService,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val userKeyStore: UserKeyStore
 ) {
     suspend fun login(email: String, password: String): Result<PublicProfile> {
         return try {
@@ -31,6 +35,7 @@ class AuthRepository(
                     tokenManager.saveAccessToken(body.tokens.accessToken)
                     tokenManager.saveRefreshToken(body.tokens.refreshToken)
                     Result.success(body.publicProfile)
+
                 } else {
                     Result.failure(Exception("Токены не получены"))
                 }
@@ -43,9 +48,20 @@ class AuthRepository(
             Result.failure(e)
         }
     }
-
+    suspend fun fetchEncryptedAESKey(publicKey: String): ByteArray? {
+        return try {
+            val response = apiService.getMyKey(PublicKey(publicKey))
+            if (response.isSuccessful) {
+                val encryptedBase64 = response.body()?.key ?: return null
+                Base64.decode(encryptedBase64, Base64.DEFAULT)
+            } else null
+        } catch (e: Exception) {
+            null
+        }
+    }
     fun logout() {
         tokenManager.clearTokens()
+        userKeyStore.clearKey()
     }
 
     private fun parseErrorMessage(errorBody: String?): String {

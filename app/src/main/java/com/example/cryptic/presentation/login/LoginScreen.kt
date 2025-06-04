@@ -49,13 +49,15 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.di.LocalAuthRepository
 import com.example.cryptic.di.LocalMainViewModel
+import com.example.cryptic.di.LocalUserKeyStore
 import com.example.cryptic.presentation.start.GradientBackground
 
 @Composable
 fun LoginScreen(navController: NavController) {
     val authRepository = LocalAuthRepository.current
+    val userKeyStore = LocalUserKeyStore.current
     val viewModel: LoginViewModel = viewModel(
-        factory = LoginViewModelFactory(authRepository)
+        factory = LoginViewModelFactory(authRepository, userKeyStore)
     )
 
     GradientBackground {

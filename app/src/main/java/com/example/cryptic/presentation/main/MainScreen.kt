@@ -78,6 +78,7 @@ fun HomeScreen(navController: NavHostController) {
     var showMenu = remember { mutableStateOf(false) }
     val imageUrl = profile?.avatar
 
+
     LaunchedEffect(Unit) {
         settingsViewModel.connect()
     }

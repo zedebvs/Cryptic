@@ -1,6 +1,7 @@
 package com.example.cryptic.di
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.example.cryptic.data.Crypto.UserKeyStore
 import com.example.cryptic.data.repository.AuthRepository
 import com.example.cryptic.data.repository.RegisterRepository
 import com.example.cryptic.data.local.TokenManager
@@ -46,4 +47,8 @@ val LocalPublicProfileViewModel = staticCompositionLocalOf<PublicProfileViewMode
 
 val LocalChatViewModel = staticCompositionLocalOf<ChatViewModel> {
     error("No ChatViewModel provided")
+}
+
+val LocalUserKeyStore = staticCompositionLocalOf<UserKeyStore> {
+    error("No UserKeyStore provided")
 }

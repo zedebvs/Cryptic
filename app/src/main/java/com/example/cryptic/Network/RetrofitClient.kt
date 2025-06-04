@@ -5,9 +5,12 @@ import com.example.cryptic.data.local.TokenManager
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.*
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.0.200:8000"
+    private const val BASE_URL = "https://192.168.0.222"
 
     fun getApiService(tokenManager: TokenManager): ApiService {
         val okHttpClient = OkHttpClient.Builder()

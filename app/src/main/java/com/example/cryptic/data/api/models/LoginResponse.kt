@@ -76,4 +76,5 @@ data class ProfileUser(
     val online: Int,
     val lastonline: String
 )
-
+data class PublicKey(val key: String)
+data class AesChipherKey(val key: String)
