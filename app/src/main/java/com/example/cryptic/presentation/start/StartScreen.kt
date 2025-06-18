@@ -31,7 +31,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cryptic.R
 import com.example.cryptic.di.LocalTokenManager
-
+import com.example.cryptic.presentation.start.GradientBackground
 
 @Composable
 fun StartScreen(navController: NavController) {

@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
         val profileViewModel = ProfileViewModel(profileRepository, authRepository)
         val socketRepository = SocketRepository(tokenManager, apiService)
         val searchViewModel = SearchViewModel(profileRepository)
-        val chatRepository = ChatRepository(tokenManager, apiService)
+        val chatRepository = ChatRepository(tokenManager, apiService, userKeyStore)
         val publicProfileViewModel = PublicProfileViewModel(profileRepository)
         val chatViewModel = ChatViewModel(chatRepository)
 

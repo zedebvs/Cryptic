@@ -2,6 +2,7 @@
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,10 +42,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
-
+import androidx.navigation.NavHostController
 
 @Composable
-fun ChatScreen(recipientId: Int) {
+fun ChatScreen(recipientId: Int, navController: NavHostController) {
     val chatViewModel = LocalChatViewModel.current
     val messages by chatViewModel.messages.collectAsState()
     val profile by chatViewModel.profile.collectAsState()
@@ -105,51 +106,131 @@ fun ChatScreen(recipientId: Int) {
                 ChatHeader(
                     name = user.name,
                     avatarUrl = user.avatar,
-                    status = if (user.online > 0) "online" else formatLastonline(user.lastonline)
-
+                    status = if (user.online > 0) "online" else formatLastonline(user.lastonline),
+                    onClick = {
+                        navController.navigate("public_profile/${recipientId}")
+                    }
                 )
-
             }
         },
-        containerColor = Color(0xFF1E1E24)
-    )
-    { paddingValues ->
-
+        containerColor = Color(0xFF1E1E24),
+        bottomBar = {
+            MessageInputField(
+                onMessageSent = { text ->
+                    chatViewModel.sendMessage(recipientId, text)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .imePadding()
+            )
+        }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .imePadding()
         ) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                state = listState,
+                reverseLayout = false,
+                verticalArrangement = Arrangement.Bottom,
+                contentPadding = PaddingValues(bottom = 8.dp, top = 8.dp, end = 8.dp, start = 8.dp),
             ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    state = listState,
-                    reverseLayout = false,
-                    verticalArrangement = Arrangement.Bottom,
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                ) {
-                    items(messages) { message ->
-                        MessageBubble(
-                            text = message.text,
-                            isMine = message.sender_id != profile?.profile_id,
-                            time = message.timestamp,
-                            status = message.status,
-                            isEdited = message.is_edited
-                        )
-                    }
+                items(messages) { message ->
+                    MessageBubble(
+                        text = message.text,
+                        isMine = message.sender_id != profile?.profile_id,
+                        time = message.timestamp,
+                        status = message.status,
+                        isEdited = message.is_edited
+                    )
                 }
+            }
+        }
+    }
+}
 
-                MessageInputField(
-                    onMessageSent = { text ->
-                        chatViewModel.sendMessage(recipientId, text)
+@Composable
+fun MessageInputField(
+    onMessageSent: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var text by remember { mutableStateOf("") }
+
+    Surface(
+        color = Color(0xFF2A2A32),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = {  },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AttachFile,
+                    contentDescription = "Attach",
+                    tint = Color(0xFFA0A0A0),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 40.dp, max = 120.dp)
+                    .background(Color(0xFF1E1E24), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                BasicTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterStart),
+                    textStyle = TextStyle(
+                        color = Color.White,
+                        fontSize = 15.sp
+                    ),
+                    decorationBox = { innerTextField ->
+                        if (text.isEmpty()) {
+                            Text(
+                                text = "Напишите сообщение...",
+                                color = Color(0xFFA0A0A0),
+                                fontSize = 15.sp
+                            )
+                        }
+                        innerTextField()
+                    },
+                    singleLine = false,
+                    maxLines = 5
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            IconButton(
+                onClick = {
+                    if (text.isNotBlank()) {
+                        onMessageSent(text)
+                        text = ""
                     }
+                },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Send,
+                    contentDescription = "Send",
+                    tint = Color(0xFF6C5CE7),
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -160,13 +241,15 @@ fun ChatScreen(recipientId: Int) {
 fun ChatHeader(
     name: String,
     avatarUrl: String,
-    status: String
+    status: String,
+    onClick: () -> Unit
 ) {
     Surface(
         color = Color(0xFF2A2A32),
         tonalElevation = 4.dp,
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
     ) {
         Row(
@@ -303,92 +386,6 @@ fun MessageBubble(
     }
 }
 
-@Composable
-fun MessageInputField(
-    onMessageSent: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var text by remember { mutableStateOf("") }
-
-        Surface(
-            color = Color(0xFF2A2A32),
-            modifier = modifier
-                .fillMaxWidth()
-        ){
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Кнопка прикрепления файла
-            IconButton(
-                onClick = { /* Прикрепить файл */ },
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AttachFile,
-                    contentDescription = "Attach",
-                    tint = Color(0xFFA0A0A0),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // Поле ввода
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 40.dp, max = 120.dp)
-                    .background(Color(0xFF1E1E24), RoundedCornerShape(20.dp))
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                BasicTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterStart),
-                    textStyle = TextStyle(
-                        color = Color.White,
-                        fontSize = 15.sp
-                    ),
-                    decorationBox = { innerTextField ->
-                        if (text.isEmpty()) {
-                            Text(
-                                text = "Напишите сообщение...",
-                                color = Color(0xFFA0A0A0),
-                                fontSize = 15.sp
-                            )
-                        }
-                        innerTextField()
-                    },
-                    singleLine = false,
-                    maxLines = 5
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Кнопка отправки
-            IconButton(
-                onClick = {
-                    if (text.isNotBlank()) {
-                        onMessageSent(text)
-                        text = ""
-                    }
-                },
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Send,
-                    contentDescription = "Send",
-                    tint = Color(0xFF6C5CE7),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-    }
-}
 
 fun formatMessageTime(timestamp: String): String {
     return try {

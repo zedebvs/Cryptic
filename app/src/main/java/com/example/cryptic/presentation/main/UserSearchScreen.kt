@@ -133,9 +133,14 @@ fun UserSearchScreen(navController: NavHostController) {
                         onViewProfile = { if (user.id != null) {
                             navController.navigate("public_profile/${user.id}")
                         }},
-                        onSendMessage = { if (user.id != null) {
-                            navController.navigate("chat/${user.id}")
-                        } }
+                        onSendMessage = {
+                            if (user.id != null) {
+                                navController.navigate("chat/${user.id}")
+                                {
+                                    popUpTo("home") { inclusive = false }
+                                }
+                            }
+                        }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }

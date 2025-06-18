@@ -40,9 +40,4 @@ class ChatViewModel(
     fun requestMessages(recipientId: Int) {
         chatRepository.requestMessages(recipientId)
     }
-
-    fun clearChat() {
-        _messages.value = emptyList()
-        _profile.value = null
-    }
 }

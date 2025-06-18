@@ -1,5 +1,7 @@
 import android.util.Log
 import com.example.cryptic.Network.WebSocketClient
+import com.example.cryptic.data.Crypto.AESHelper
+import com.example.cryptic.data.Crypto.UserKeyStore
 import com.example.cryptic.data.api.ApiService
 import com.example.cryptic.data.api.models.ChatItem
 import com.example.cryptic.data.api.models.MessageItem
@@ -25,7 +27,8 @@ import kotlinx.serialization.json.buildJsonObject
 
 class ChatRepository(
     private val tokenManager: TokenManager,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val userKeyStore: UserKeyStore
 ) {
     private val _chats = MutableStateFlow<List<ChatItem>>(emptyList())
     val chats: StateFlow<List<ChatItem>> = _chats
@@ -41,10 +44,47 @@ class ChatRepository(
     fun setOnMessagesReceivedListener(listener: (List<MessageItem>, ProfileUser) -> Unit) {
         onMessagesReceivedListener = listener
     }
+
     init {
         WebSocketClient.init(tokenManager, apiService)
         WebSocketClient.setOnMessageReceivedListener { message ->
             handleWebSocketMessage(message)
+        }
+    }
+    private fun decryptChatIfNeeded(chat: ChatItem): ChatItem {
+        return if (chat.iv != null && chat.tag != null) {
+            val hexKey = userKeyStore.getAesKey() ?: return chat
+            try {
+                val decryptedText = AESHelper.decrypt(
+                    ciphertextBase64 = chat.text,
+                    ivBase64 = chat.iv,
+                    tagBase64 = chat.tag,
+                    hexKey = hexKey
+                )
+                chat.copy(text = decryptedText)
+            } catch (e: Exception) {
+                chat.copy(text = "Зашифровано без возможности расшифрования")
+            }
+        } else {
+            chat
+        }
+    }
+    private fun decryptMessageIfNeeded(message: MessageItem): MessageItem {
+        return if (message.iv != null && message.tag != null) {
+            val hexKey = userKeyStore.getAesKey() ?: return message
+            try {
+                val decryptedText = AESHelper.decrypt(
+                    ciphertextBase64 = message.text,
+                    ivBase64 = message.iv,
+                    tagBase64 = message.tag,
+                    hexKey = hexKey
+                )
+                message.copy(text = decryptedText)
+            } catch (e: Exception) {
+                message.copy(text = "Зашифровано без возможности расшифрования")
+            }
+        } else {
+            message
         }
     }
 
@@ -62,12 +102,13 @@ class ChatRepository(
                 "chats" -> {
                     if (data != null && data !is JsonNull) {
                         val chats = Json.decodeFromJsonElement<List<ChatItem>>(data)
-                        _chats.value = chats.sortedByDescending { it.timestamp }
+                        val decryptedChats = chats.map { decryptChatIfNeeded(it) }
+                        _chats.value = decryptedChats.sortedByDescending { it.timestamp }
                     }
                 }
                 "message_sent" -> {
                     if (data != null && data !is JsonNull) {
-                        val newMessage = Json.decodeFromJsonElement<MessageItem>(data)
+                        val newMessage = decryptMessageIfNeeded(Json.decodeFromJsonElement<MessageItem>(data))
                         val updatedMessages = _messages.value.toMutableList().apply { add(newMessage) }
                         _messages.value = updatedMessages
 
@@ -78,7 +119,7 @@ class ChatRepository(
                 }
                 "message_read" -> {
                     if (data != null) {
-                        val updatedMessage = Json.decodeFromJsonElement<MessageItem>(data)
+                        val updatedMessage = decryptMessageIfNeeded(Json.decodeFromJsonElement<MessageItem>(data))
                         val updatedMessages = _messages.value.map {
                             if (it.id == updatedMessage.id) updatedMessage else it
                         }
@@ -91,10 +132,12 @@ class ChatRepository(
                 }
                 "new_message" -> {
                     if (data != null && data !is JsonNull) {
-                        val newMessage = Json.decodeFromJsonElement<MessageItem>(data)
+                        val newMessage = decryptMessageIfNeeded(Json.decodeFromJsonElement<MessageItem>(data))
                         val updatedMessages = _messages.value.toMutableList().apply { add(newMessage) }
                         _messages.value = updatedMessages
-
+//                        val newMessage = Json.decodeFromJsonElement<MessageItem>(data)
+//                        val updatedMessages = _messages.value.toMutableList().apply { add(newMessage) }
+//                        _messages.value = updatedMessages
                         _currentChatProfile.value?.let { profile ->
                             onMessagesReceivedListener?.invoke(updatedMessages, profile)
                         }
@@ -104,27 +147,29 @@ class ChatRepository(
                 "updateChat" -> {
                     if (data != null && data !is JsonNull) {
                         val updatedChatItem = Json.decodeFromJsonElement<ChatItem>(data)
-                        updateChats(updatedChatItem)
+                        val decryptedChatItem = decryptChatIfNeeded(updatedChatItem)
+                        updateChats(decryptedChatItem)
                     }
                 }
                 "messages_list" -> {
                     val profileJson = json["profile"]
                     if (data != null && profileJson != null) {
                         val messages = Json.decodeFromJsonElement<List<MessageItem>>(data)
+                        val messagesDecrypted = messages.map { decryptMessageIfNeeded(it) }
                         val profileUser = Json.decodeFromJsonElement<ProfileUser>(profileJson)
-                        _messages.value = messages
+                        _messages.value = messagesDecrypted
                         _currentChatProfile.value = profileUser
 
-                        onMessagesReceivedListener?.invoke(messages, profileUser)
+                        onMessagesReceivedListener?.invoke(messagesDecrypted, profileUser)
                     }
                 }
                 else -> {
-                    Log.w("ChatRepository", "Unknown action: $action")
+                    Log.w("ChatRepository", "unknown action: $action")
                 }
             }
 
         } catch (e: Exception) {
-            Log.e("ChatRepository", "Error parsing WebSocket message", e)
+            Log.e("ChatRepository", "ошибка парсинга", e)
         }
     }
 
@@ -133,7 +178,10 @@ class ChatRepository(
         WebSocketClient.send(request)
     }
     fun sendMessage(recipientId: Int, messageText: String) {
-        val request = """{ "action": "sendMessage", "recipient_id": $recipientId, "message": "$messageText" }"""
+        val hexKey = userKeyStore.getAesKey()?: run { return }
+        val (ciphertext, iv, tag) = AESHelper.encrypt(messageText, hexKey)
+
+        val request = """{ "action": "sendMessage", "recipient_id": $recipientId, "message": "$ciphertext", "iv": "$iv", "tag": "$tag" }"""
         WebSocketClient.send(request)
     }
     fun markMessageAsRead(id: String) {

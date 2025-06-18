@@ -58,7 +58,7 @@ fun AppNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("recipientId") { type = NavType.IntType })
         ) { backStackEntry ->
             val recipientId = backStackEntry.arguments?.getInt("recipientId") ?: -1
-            ChatScreen(recipientId = recipientId)
+            ChatScreen(recipientId = recipientId, navController = navController)
         }
 
         composable(

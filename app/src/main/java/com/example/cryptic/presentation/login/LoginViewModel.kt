@@ -31,36 +31,30 @@ class LoginViewModel(
     fun login(email: String, password: String) {
         _state.value = LoginState.Loading
         viewModelScope.launch {
-            val result = authRepository.login(email, password)
-            if (result.isSuccess) {
-                RSAHelper.generateRSAKeyPairIfNeeded()
-                val publicKey = RSAHelper.getPublicKey()
+            val result = runCatching { authRepository.login(email, password).getOrThrow() }
+                .fold(
+                    onSuccess = { handleLoginSuccess(it) },
+                    onFailure = { LoginState.Error(it.message ?: "неизвестная ошибка") }
+                )
+            _state.value = result
+        }
+    }
 
-                Log.d("PUBLIC_KEY", Base64.encodeToString(publicKey.encoded, Base64.NO_WRAP))
+    private suspend fun handleLoginSuccess(profile: PublicProfile): LoginState {
+        RSAHelper.generateRSAKeyPairIfNeeded()
+        val publicKey = RSAHelper.getPublicKey()
+        val publicKeyBase64 = Base64.encodeToString(publicKey.encoded, Base64.NO_WRAP)
 
-                val publicKeyBase64 = Base64.encodeToString(publicKey.encoded, Base64.NO_WRAP)
+        val encryptedAES = authRepository.fetchEncryptedAESKey(publicKeyBase64)
+            ?: return LoginState.Error("не удалось получить AES-ключ с сервера")
 
-                val encryptedAES = authRepository.fetchEncryptedAESKey(publicKeyBase64)
-                if (encryptedAES != null) {
-                    try {
-                        Log.d("KEY_RAW_LENGTH", "Encrypted key length: ${encryptedAES.size}")
-                        val decryptedAES = RSAHelper.decryptWithPrivateKey(encryptedAES)
-                        val aesHex = decryptedAES.joinToString("") { "%02x".format(it) }
-                        userKeyStore.saveAesKey(aesHex)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        _state.value = LoginState.Error("Ошибка расшифровки AES-ключа: ${e::class.java.simpleName} ${e.message}")
-                        return@launch
-                    }
-                } else {
-                    _state.value = LoginState.Error("Не удалось получить AES-ключ с сервера")
-                    return@launch
-                }
-
-                _state.value = LoginState.Success(result.getOrThrow())
-            } else {
-                _state.value = LoginState.Error(result.exceptionOrNull()?.message ?: "Неизвестная ошибка")
-            }
+        return try {
+            val decryptedAES = RSAHelper.decryptWithPrivateKey(encryptedAES)
+            val aesHex = decryptedAES.joinToString("") { "%02x".format(it) }
+            userKeyStore.saveAesKey(aesHex)
+            LoginState.Success(profile)
+        } catch (e: Exception) {
+            LoginState.Error("ошибка расшифровки AES-ключа: ${e.message ?: e::class.java.simpleName}")
         }
     }
 }

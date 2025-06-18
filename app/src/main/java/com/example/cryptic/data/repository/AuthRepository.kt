@@ -17,6 +17,7 @@ import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
 import android.util.Base64
+import com.example.cryptic.data.Crypto.RSAHelper
 import com.example.cryptic.data.Crypto.UserKeyStore
 
 class AuthRepository(
@@ -62,14 +63,15 @@ class AuthRepository(
     fun logout() {
         tokenManager.clearTokens()
         userKeyStore.clearKey()
+        RSAHelper.deleteRSAKeys()
     }
 
     private fun parseErrorMessage(errorBody: String?): String {
         return try {
             val jsonObject = JSONObject(errorBody)
-            jsonObject.optString("detail", "Неизвестная ошибка")
+            jsonObject.optString("detail", "ошибка")
         } catch (e: Exception) {
-            "Неизвестная ошибка"
+            "ошибка"
         }
     }
 }
@@ -86,14 +88,14 @@ class RegisterRepository(
                     if (body == "true" || body == "True") {
                         Result.success(Unit)
                     } else {
-                        Result.failure(Exception("Неожиданный ответ от сервера: $body"))
+                        Result.failure(Exception("неожиданный ответ от сервера: $body"))
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
                     val errorDetail = try {
                         JSONObject(errorBody).getString("detail")
                     } catch (ex: Exception) {
-                        errorBody ?: "Неизвестная ошибка"
+                        errorBody ?: "ошибка"
                     }
                     Result.failure(Exception(errorDetail))
                 }

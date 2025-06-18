@@ -33,7 +33,7 @@ abstract class BaseRepository {
         } catch (e: IOException) {
             Result.failure(Exception("Проблема с подключением"))
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Проблема с подключением"))
         }
     }
 }

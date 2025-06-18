@@ -130,7 +130,9 @@ fun PublicProfileScreen(navController: NavHostController, userId: Int) {
 
                         Button(
                             onClick = {
-                                navController.navigate("chat/${user.id}")
+                                navController.navigate("chat/${user.id}"){
+                                    popUpTo("home") { inclusive = false }
+                                }
                             },
                             modifier = Modifier
                                 .fillMaxWidth(0.7f)

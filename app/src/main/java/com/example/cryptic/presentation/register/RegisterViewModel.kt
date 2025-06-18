@@ -55,7 +55,7 @@ class RegisterViewModel(
             _state.value = when {
                 result.isSuccess -> RegistrationState.Success
                 else -> RegistrationState.Error(
-                    result.exceptionOrNull()?.message ?: "Неизвестная ошибка"
+                    result.exceptionOrNull()?.message ?: "ошибка"
                 )
             }
         }

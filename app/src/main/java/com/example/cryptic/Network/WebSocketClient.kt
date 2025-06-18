@@ -27,12 +27,12 @@ object WebSocketClient {
 
     private lateinit var apiService: ApiService
 
-    private var pingJob: Job? = null//
+    private var pingJob: Job? = null
 
     private fun startPinging() {
         pingJob = CoroutineScope(Dispatchers.IO).launch {
             while (isConnected) {
-                delay(30_000) // каждые 30 секунд
+                delay(30_000)
                 send("""{"action": "ping"}""")
             }
         }
@@ -87,25 +87,21 @@ object WebSocketClient {
 
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
-            Log.d("WebSocket", "Connected")
             isConnected = true
 
             startPinging()
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            Log.d("WebSocket", "Message: $text")
             onMessageReceived?.invoke(text)
             onRawMessageReceived?.invoke(text)
         }
 
         override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-            Log.d("WebSocket", "Closing: $code $reason")
             isConnected = false
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            Log.e("WebSocket", "Failure: ${t.message}")
             isConnected = false
 
             if (response?.code == 401) {
@@ -115,7 +111,6 @@ object WebSocketClient {
     }
 
     private fun reconnectWithNewToken() {
-        Log.d("WebSocket", "Attempting reconnect with refreshed token")
 
         val newToken = tokenManager.refreshTokenBlocking(apiService)
 

@@ -1,6 +1,7 @@
 package com.example.cryptic.data.Crypto
 
 import android.security.keystore.*
+import android.util.Log
 import java.security.*
 import javax.crypto.Cipher
 
@@ -39,5 +40,15 @@ object RSAHelper {
         val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
         cipher.init(Cipher.DECRYPT_MODE, privateKey)
         return cipher.doFinal(encrypted)
+    }
+    fun deleteRSAKeys() {
+        try {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+            if (keyStore.containsAlias(KEY_ALIAS)) {
+                keyStore.deleteEntry(KEY_ALIAS)
+            }
+        } catch (e: Exception) {
+            Log.e("RSAHelper", "ну сколько можно то аааа", e)
+        }
     }
 }
