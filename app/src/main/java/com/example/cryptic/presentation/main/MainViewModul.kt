@@ -59,8 +59,4 @@ class MainViewModel(
         }
     }
 
-    fun requestChats() {
-        chatRepository.requestChats()
-    }
-
 }

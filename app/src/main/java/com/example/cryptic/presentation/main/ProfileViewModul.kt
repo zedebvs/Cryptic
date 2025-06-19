@@ -19,9 +19,6 @@ class ProfileViewModel(
     private val _profile = MutableStateFlow<PrivateProfile?>(null)
     val profile: StateFlow<PrivateProfile?> = _profile
 
-    fun setProfile(privateProfile: PrivateProfile) {
-        _profile.value = privateProfile
-    }
     fun logout() {
         authRepository.logout()
     }
